@@ -1,6 +1,6 @@
 const express = require('express');
-const users = require('./u');
-const posts = require('./p');
+const users = require('./users');
+const posts = require('./posts');
 
 const router = express.Router();
 
