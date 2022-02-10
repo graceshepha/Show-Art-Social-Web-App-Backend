@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "node-terminal",
+            "name": "Start debugging database",
+            "request": "launch",
+            "command": "npm run start",
+            "env": {
+                "DEBUG": "backend:database"
+            },
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

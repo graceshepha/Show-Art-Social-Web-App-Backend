@@ -1,3 +1,4 @@
+const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
 const schemas = require('./schemas');
 
@@ -13,15 +14,29 @@ class Database {
   #connected;
 
   constructor() {
-    const uri = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}?retryWrites=true&w=majority`;
+    const {
+      DB_ADMIN_USER: user,
+      DB_ADMIN_PASSWORD: pass,
+      DB_SERVER: server = 'localhost',
+      DB_PORT: port = '27017',
+      DB_DATABASE: db = '',
+    } = process.env;
+    if (!user || !pass) throw Error('Environment variables DB_ADMIN_USER and DB_ADMIN_PASSWORD must be set');
+
+    const uri = `mongodb://${user}:${pass}@${server}:${port}/${db}?retryWrites=true&w=majority`;
 
     this.#client = mongoose.createConnection(uri, { useNewUrlParser: true });
     this.#connected = true;
 
     // handle error
-    this.#client.on('error', (e) => {
+    this.#client.once('connected', async () => {
+      debug('Connection successful');
+    });
+
+    this.#client.on('error', (err) => {
+      debug(`Error database connection: ${err}`);
       this.#connected = false;
-      console.error(e);
+      this.#client.close();
     });
   }
 
@@ -35,7 +50,7 @@ class Database {
   }
 
   getUserModel() {
-    return this.#getModel('UserAccount', schemas.userSchema);
+    return this.#getModel('User', schemas.userSchema);
   }
 
   getPostModel() {
