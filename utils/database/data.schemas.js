@@ -1,4 +1,5 @@
 // @ts-check
+const paginate = require('mongoose-paginate-v2');
 const { Schema } = require('mongoose');
 
 /**
@@ -6,7 +7,7 @@ const { Schema } = require('mongoose');
  *
  * @author Roger Montero
  */
-exports.userSchema = new Schema({
+const userSchema = new Schema({
   username: {
     type: String,
     unique: true,
@@ -39,13 +40,13 @@ exports.userSchema = new Schema({
   followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 });
-
+userSchema.plugin(paginate);
 /**
  * Schéma de la collection `posts`.
  *
  * @author Roger Montero
  */
-exports.postSchema = new Schema({
+const postSchema = new Schema({
   title: {
     type: String,
     required: [true, 'Title must be given'],
@@ -103,13 +104,13 @@ exports.postSchema = new Schema({
     comment: { type: String, immutable: true },
   }],
 });
-
+postSchema.plugin(paginate);
 /**
  * Schéma de la collection `tags`.
  *
  * @author Roger Montero
  */
-exports.tagSchema = new Schema({
+const tagSchema = new Schema({
   name: {
     type: String,
     lowercase: true,
@@ -119,3 +120,8 @@ exports.tagSchema = new Schema({
   description: String,
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
 });
+tagSchema.plugin(paginate);
+
+exports.userSchema = userSchema;
+exports.postSchema = postSchema;
+exports.tagSchema = tagSchema;

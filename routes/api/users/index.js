@@ -1,20 +1,30 @@
+const router = require('express').Router();
+const { PaginationParameters } = require('mongoose-paginate-v2');
+const userRepository = require('../../../data/UserRepository');
 /**
- * 
- * @author My-Anh Chau            
- * 
+ *
+ * @author My-Anh Chau
+ *
  */
 
-/*
-const { Router } = require('express');
-const express = require('express');
-const router = express.Router();      
-*/
-
-const router = require('express').Router();
-
-const userRepository = require('../../../data/UserRepository');
-
 // router.use(authMiddleware, user);
+/**
+ * GET /api/u/ qui retourne tous les utilisateurs avec pagination
+ * @author Roger Montero
+ */
+router.get('/', async (req, res) => {
+  try {
+    const users = await userRepository.getAll(new PaginationParameters(req).getOptions());
+    return res
+      .status(200)
+      .json(users);
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(400)
+      .json({ status: 400, message: 'Internal Server Error' });
+  }
+});
 
 // ROUTE POUR AJOUTER UN USER
 router.post('/add', async (req, res) => {
@@ -26,7 +36,7 @@ router.post('/add', async (req, res) => {
       .end();
   } catch (err) {
     console.error(err);
-    res
+    return res
       .status(400)
       .json({ status: 400, message: 'Internal Server Error' });
   }
@@ -35,7 +45,7 @@ router.post('/add', async (req, res) => {
 
 /*
   // request body plutot express
-  // verifie avec la documentation 
+  // verifie avec la documentation
 
   const user = new User(userInfo);
   // get user by id
@@ -45,8 +55,7 @@ router.post('/add', async (req, res) => {
   // return user
   res.status(201);
   //faire un si sa fail de faire un autre message derreur
-  // type derreur 
-
+  // type derreur
 
 // routes
 /*

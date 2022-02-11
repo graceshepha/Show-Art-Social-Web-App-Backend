@@ -7,7 +7,7 @@ const router = express.Router();
 // routes
 router.use('/u', users);
 // on va pas l'utiliser encore
-// router.use('/p', posts); 
+// router.use('/p', posts);
 
 module.exports = router;
 

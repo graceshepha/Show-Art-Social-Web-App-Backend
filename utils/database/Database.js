@@ -68,31 +68,34 @@ class DatabaseClient {
 
   /**
    * Returns model of a User
-   * @returns {mongoose.Model<any, {}, {}, {}>} User model
+   * @returns {mongoose.PaginateModel<any>} User model
    * @throws {DatabaseError}
    */
   getUserModel() {
     if (!this.isConnected) throw new DatabaseError(2);
+    // @ts-ignore
     return this.#client.model('User', schemas.userSchema);
   }
 
   /**
    * Returns model of a Post
-   * @returns {mongoose.Model<any, {}, {}, {}>} Post model
+   * @returns {mongoose.PaginateModel<any>} Post model
    * @throws {DatabaseError}
    */
   getPostModel() {
     if (!this.isConnected) throw new DatabaseError(2);
+    // @ts-ignore
     return this.#client.model('Post', schemas.postSchema);
   }
 
   /**
    * Returns model of a Tag
-   * @returns {mongoose.Model<any, {}, {}, {}>} Tag model
+   * @returns {mongoose.PaginateModel<any>} Tag model
    * @throws {DatabaseError}
    */
   getTagModel() {
     if (!this.isConnected) throw new DatabaseError(2);
+    // @ts-ignore
     return this.#client.model('Tag', schemas.tagSchema);
   }
 

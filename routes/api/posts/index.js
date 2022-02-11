@@ -1,7 +1,7 @@
 /**
- * 
- * @author My-Anh Chau            
- * 
+ *
+ * @author My-Anh Chau
+ *
  */
 const post = require('./post');
 const postRepository = require('../../../data/UserRepository');
@@ -9,7 +9,6 @@ const postRepository = require('../../../data/UserRepository');
 const router = express.Router();
 
 // routes
-
 
 // ROUTE POUR GET LES POSTS
 router.get('/', async (req, res) => {
@@ -69,8 +68,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-
-
 // ROUTE POUR ENLEVER UN POST
 router.delete('/p', async (req, res) => {
   const { idPost, idTag } = req.query;
@@ -93,8 +90,5 @@ router.delete('/p', async (req, res) => {
       .json({ status: 500, message: 'Internal Server Error' });
   }
 });
-
-
-
 
 module.exports = router;

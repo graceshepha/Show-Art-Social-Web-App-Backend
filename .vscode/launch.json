@@ -2,7 +2,7 @@
     "configurations": [
         {
             "type": "node-terminal",
-            "name": "Debug database",
+            "name": "Debug backend",
             "request": "launch",
             "command": "npm run start",
             "env": {

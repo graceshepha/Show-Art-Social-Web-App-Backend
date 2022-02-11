@@ -2,6 +2,12 @@
 const debug = require('debug')('backend:database');
 const { client, DatabaseError } = require('../utils/database');
 
+/** @type {import('mongoose').PaginateOptions} */
+const options = {
+  lean: true,
+  limit: 2,
+};
+
 /**
  * Dépot d'un utilisateur qui possède tous les fonctions pour CRUD
  * d'un utilisateur dans l'application.
@@ -17,10 +23,29 @@ class UserRepository {
   }
 
   /**
-   * Insertion d'un utilisateur
+   * Trouver tous les documents de la collection
    *
-   * @param {Object<string,*>} info
-   * @returns {Promise<Object>} User created
+   * @param {import('mongoose').PaginateOptions} options Options de la pagination
+   * @returns {Promise<Object>} Liste de tous les utilisateurs
+   */
+  async getAll({ offset, page = 1 }) {
+    const o = { ...options };
+    if (!offset) o.page = page;
+    else o.offset = offset;
+
+    try {
+      return await this.#model.paginate({}, o);
+    } catch (err) {
+      debug(err);
+      throw new DatabaseError();
+    }
+  }
+
+  /**
+   * Insertion d'un utilisateur à la collection
+   *
+   * @param {Object<string,*>} info Details d'un utilisateur
+   * @returns {Promise<Object>} Utilisateur créé
    * @throws {ValidationError|DatabaseError}
    */
   async insertOne(info) {
@@ -36,14 +61,12 @@ class UserRepository {
       } else if (err.code === 11000) {
         // DUPLICATED
         const [key] = Object.keys(err.keyValue);
-        const e = new DatabaseError(3, `Two users cannot share the same ${key} (${err.keyValue[key]})`);
-        debug(e);
-        throw e;
+        debug(err);
+        throw new DatabaseError(3, `Two users cannot share the same ${key} (${err.keyValue[key]})`, err);
       } else {
         // UNKNOWN ERROR
-        const e = new DatabaseError();
-        debug(e);
-        throw e;
+        debug(err);
+        throw new DatabaseError();
       }
     }
   }

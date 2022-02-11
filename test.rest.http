@@ -1,0 +1,32 @@
+GET http://localhost:3000/api/u/
+    ?page=2
+
+###
+
+GET http://localhost:3000/api/u/
+    ?offset=2
+
+###
+
+POST http://localhost:3000/api/u/add
+Content-Type: application/json
+
+{
+    "username": "testing_username",
+    "email": "testing@mail.com"
+}
+
+###
+
+POST http://localhost:3000/api/u/add
+Content-Type: application/json
+
+{
+    "username": "testing_username2",
+    "email": "testing2@mail.com",
+    "details": {
+        "socials": {
+            "facebook": "facebook.com"
+        }
+    }
+}
