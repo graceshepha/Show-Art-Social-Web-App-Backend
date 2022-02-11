@@ -11,9 +11,12 @@ const router = express.Router();
 */
 
 const router = require('express').Router();
+
 const {
   getUser, addUser,
 } = require('BD/USER');
+
+router.use(authMiddleware, user);
 
 // ROUTE POUR GET LE USER
 router.get('/u', async (req, res) => {
