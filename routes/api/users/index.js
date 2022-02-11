@@ -1,27 +1,59 @@
+/**
+ * 
+ * @author My-Anh Chau            
+ * 
+ */
+
+/*
 const { Router } = require('express');
 const express = require('express');
+const router = express.Router();      
+*/
 
-const router = express.Router();
+const router = require('express').Router();
+const {
+  getUser, addUser,
+} = require('BD/USER');
 
-let UserRepository = new bd();
+// ROUTE POUR GET LE USER
+router.get('/u', async (req, res) => {
+  try {
+    const items = await getUser(req.userId);
 
-router.post('/', function (req, res) {
-  res.send('post request ds homepage')
-})
+    res
+      .status(200)
+      .json(items);
+  } catch {
+    res
+      .status(500)
+      .json({ status: 500, message: 'Internal Server Error' });
+  }
+});
 
-router.get('/', function (req, res) {
-  res.send('get request ds homepage')
-})
-
-// pas sure
-router.use(authorizationFunction);
-router.put();
-router.delete();
-
+  // ROUTE POUR AJOUTER UN USER
+  router.post('/u', async (req, res) => {
+    const { idUser } = req.query;
+    try {
+      if (!idUser) {
+        res
+          .status(400)
+          .json({ status: 400, message: 'Bad Request' });
+      } else {
+        await addUser({ idUtilisateur: req.userId, idUser });
+        res
+          .status(200)
+          .end();
+      }
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ status: 500, message: 'Internal Server Error' });
+    }
+  });
 // logic qui revolve ds avant et apres fct
 
-router.post('/add', (req, res) => {
-  const { userInfo } = req.body; 
+/*
   // request body plutot express
   // verifie avec la documentation 
 
@@ -34,7 +66,7 @@ router.post('/add', (req, res) => {
   res.status(201);
   //faire un si sa fail de faire un autre message derreur
   // type derreur 
-});
+
 
 // routes
 /*
