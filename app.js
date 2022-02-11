@@ -6,7 +6,6 @@ const logger = require('morgan');
 // const { auth } = require('express-oauth2-jwt-bearer');
 
 const apiRouter = require('./routes/api');
-const authRouter = require('./routes/auth');
 
 const app = express();
 
@@ -23,6 +22,5 @@ app.use('assets', express.static(path.join(__dirname, 'public')));
 // });
 
 app.use('/api', apiRouter);
-app.use('/auth', authRouter);
 
 module.exports = app;

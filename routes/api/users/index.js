@@ -12,48 +12,25 @@ const router = express.Router();
 
 const router = require('express').Router();
 
-const {
-  getUser, addUser,
-} = require('BD/USER');
+const userRepository = require('../../../data/UserRepository');
 
-router.use(authMiddleware, user);
+// router.use(authMiddleware, user);
 
-// ROUTE POUR GET LE USER
-router.get('/u', async (req, res) => {
+// ROUTE POUR AJOUTER UN USER
+router.post('/add', async (req, res) => {
   try {
-    const items = await getUser(req.userId);
-
+    const i = req.body;
+    await userRepository.insertOne(i);
+    return res
+      .status(201)
+      .end();
+  } catch (err) {
+    console.error(err);
     res
-      .status(200)
-      .json(items);
-  } catch {
-    res
-      .status(500)
-      .json({ status: 500, message: 'Internal Server Error' });
+      .status(400)
+      .json({ status: 400, message: 'Internal Server Error' });
   }
 });
-
-  // ROUTE POUR AJOUTER UN USER
-  router.post('/u', async (req, res) => {
-    const { idUser } = req.query;
-    try {
-      if (!idUser) {
-        res
-          .status(400)
-          .json({ status: 400, message: 'Bad Request' });
-      } else {
-        await addUser({ idUtilisateur: req.userId, idUser });
-        res
-          .status(200)
-          .end();
-      }
-    } catch (err) {
-      console.error(err);
-      res
-        .status(500)
-        .json({ status: 500, message: 'Internal Server Error' });
-    }
-  });
 // logic qui revolve ds avant et apres fct
 
 /*
