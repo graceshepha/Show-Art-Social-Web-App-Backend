@@ -1,3 +1,4 @@
+// @ts-check
 const UserDetail = require('./UserDetails');
 
 /**

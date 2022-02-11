@@ -1,3 +1,4 @@
+// @ts-check
 const { Schema } = require('mongoose');
 
 /**
@@ -5,7 +6,7 @@ const { Schema } = require('mongoose');
  *
  * @author Roger Montero
  */
-const userSchema = new Schema({
+exports.userSchema = new Schema({
   username: {
     type: String,
     unique: true,
@@ -44,7 +45,7 @@ const userSchema = new Schema({
  *
  * @author Roger Montero
  */
-const postSchema = new Schema({
+exports.postSchema = new Schema({
   title: {
     type: String,
     required: [true, 'Title must be given'],
@@ -108,7 +109,7 @@ const postSchema = new Schema({
  *
  * @author Roger Montero
  */
-const tagSchema = new Schema({
+exports.tagSchema = new Schema({
   name: {
     type: String,
     lowercase: true,
@@ -118,9 +119,3 @@ const tagSchema = new Schema({
   description: String,
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
 });
-
-module.exports = {
-  userSchema,
-  postSchema,
-  tagSchema,
-};

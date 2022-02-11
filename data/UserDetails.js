@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Objet des details d'un utilisateur.
  *
