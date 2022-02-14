@@ -34,7 +34,7 @@ class DatabaseClient {
     } = process.env;
     if (!user || !pass) throw Error('Environment variables DB_ADMIN_USER and DB_ADMIN_PASSWORD must be set');
 
-    const uri = `mongodb://${user}:${pass}@${server}:${port}/${dbName}?retryWrites=true&w=majority`;
+    const uri = `mongodb://${user}:${pass}@${server}:${port}/${dbName}?retryWrites=true&w=majority&authSource=admin`;
     if (this.#connected) {
       debug('Database already connected');
       return;
