@@ -1,5 +1,5 @@
 // @ts-check
-const UserDetail = require('./UserDetails');
+import UserDetail from './UserDetails';
 
 /**
  * Objet d'un utilisateur (son utilisation est à confirmer).
@@ -84,4 +84,4 @@ class User {
   }
 }
 
-module.exports = User;
+export default User;
