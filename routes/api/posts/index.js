@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { PaginationParameters } = require('mongoose-paginate-v2');
+const mongoose = require('mongoose');
 const postRepository = require('../../../data/PostRepository');
 
 /**
@@ -10,6 +11,7 @@ const postRepository = require('../../../data/PostRepository');
 router.post('/add', async (req, res) => {
   try {
     const i = req.body;
+    i.owner = mongoose.Types.ObjectId(i.owner);
     await postRepository.insertOne(i);
     return res
       .status(201)

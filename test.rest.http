@@ -37,10 +37,9 @@ POST http://localhost:3000/api/p/add
 Content-Type: application/json
 
 {
-    "title": "title",
-    "owner": "nonduownner",
-    "image": "testing2@mail.com",
-
+    "title": "title2",
+    "owner": "620d2bc63ce78a5daf463571",
+    "image": "imagepath"
 }
 
 ###

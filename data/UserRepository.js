@@ -5,6 +5,7 @@ const { client, DatabaseError } = require('../utils/database');
 /** @type {import('mongoose').PaginateOptions} */
 const options = {
   lean: true,
+  populate: { path: 'posts' },
   limit: 2,
 };
 
@@ -34,7 +35,21 @@ class UserRepository {
     else o.offset = offset;
 
     try {
-      return await this.#model.paginate({}, o);
+      // const i = req.body;
+      // this.#model.findOne({ this.#model._id: _i._id })
+      // .populate('posts').exec((err, posts))
+
+      return await this.#model
+      .paginate({}, o);
+  
+
+/*
+      return User.findOne({ username: username })
+      .populate('posts').exec((err, posts) => {
+        console.log("Populated User " + posts);
+      })
+*/
+
     } catch (err) {
       debug(err);
       throw new DatabaseError();
