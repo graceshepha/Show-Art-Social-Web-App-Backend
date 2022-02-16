@@ -1,5 +1,5 @@
 GET http://localhost:3000/api/u/
-    ?page=2
+    ?page=1
 
 ###
 
@@ -22,11 +22,34 @@ POST http://localhost:3000/api/u/add
 Content-Type: application/json
 
 {
-    "username": "testing_username3",
-    "email": "testing3@mail.com",
+    "username": "testing_username2",
+    "email": "testing2@mail.com",
     "details": {
         "socials": {
             "facebook": "facebook.com"
         }
     }
 }
+
+###
+
+POST http://localhost:3000/api/p/add
+Content-Type: application/json
+
+{
+    "title": "title",
+    "owner": "nonduownner",
+    "image": "testing2@mail.com",
+
+}
+
+###
+
+
+GET http://localhost/api/p/
+
+
+###
+
+GET http://localhost/api/p/:id
+
