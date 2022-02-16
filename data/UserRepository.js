@@ -64,7 +64,9 @@ class UserRepository {
    * @throws {ValidationError|DatabaseError}
    */
   async insertOne(info) {
-    const user = new this.#model(info);
+    let user = await this.#model.findOne({ email: info.email }).exec();
+    if (!user) user = new this.#model(info);
+    else user.set(info);
     // VALIDATE
     try {
       await this.#model.validate(user);
