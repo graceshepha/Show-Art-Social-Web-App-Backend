@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 // @ts-check
 const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
@@ -34,10 +33,10 @@ class UserRepository {
     const o = { ...options };
     if (!offset) o.page = page;
     else o.offset = offset;
-    o.populate = 'posts';
+    o.populate = { path: 'posts' };
 
     try {
-      return await this.#model.paginate({});
+      return await this.#model.paginate({}, o);
     } catch (err) {
       debug(err);
       throw new DatabaseError();
@@ -45,13 +44,14 @@ class UserRepository {
   }
 
   /**
-   * Insert a post `postid` to a user `userid``
-   * @param {string | number | import("bson").ObjectID | import("bson").ObjectIdLike | Buffer | Uint8Array} userid
-   // eslint-disable-next-line max-len
-   * @param {string | number | import("bson").ObjectID | import("bson").ObjectIdLike | Buffer | Uint8Array} postid
+   * Insert a post `postid` to a user `userid`
+   * @param {string|mongoose.Types.ObjectId} userid
+   * @param {string|mongoose.Types.ObjectId} postid
    * @author Roger Montero
    */
   async insertPost(userid, postid) {
+    if (!userid || !postid) throw new Error('Id cannot be null');
+
     const user = await this.#model.findById(userid);
     if (!user) throw new DatabaseError(4);
     try {
@@ -71,7 +71,7 @@ class UserRepository {
    * @throws {ValidationError|DatabaseError}
    */
   async insertOne(info) {
-    let user = await this.#model.findOne({ email: info.email }).exec();
+    let user = await this.#model.findOne({ email: info.email });
     if (!user) user = new this.#model(info);
     else user.set(info);
     // VALIDATE

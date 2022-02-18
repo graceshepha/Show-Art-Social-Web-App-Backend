@@ -29,12 +29,15 @@ class DatabaseClient {
       DB_ADMIN_USER: user,
       DB_ADMIN_PASSWORD: pass,
       DB_SERVER: server = 'localhost',
+      DB_AUTH_SOURCE: authSource,
       DB_PORT: port = '27017',
       DB_DATABASE: dbName = 'test',
     } = process.env;
-    if (!user || !pass) throw Error('Environment variables DB_ADMIN_USER and DB_ADMIN_PASSWORD must be set');
+    if (!user || !pass) throw new Error('Environment variables DB_ADMIN_USER and DB_ADMIN_PASSWORD must be set');
+    const params = new URLSearchParams({ retryWrites: 'true', w: 'majority' });
+    if (authSource) params.set('authSource', authSource);
 
-    const uri = `mongodb://${user}:${pass}@${server}:${port}/${dbName}?retryWrites=true&w=majority&authSource=admin`;
+    const uri = `mongodb://${user}:${pass}@${server}:${port}/${dbName}?${params.toString()}`;
     if (this.#connected) {
       debug('Database already connected');
       return;

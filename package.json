@@ -15,7 +15,8 @@
     "mongoose": "^6.2.1",
     "mongoose-beautiful-unique-validation": "^7.1.1",
     "mongoose-paginate-v2": "^1.6.2",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "multer": "^1.4.4"
   },
   "devDependencies": {
     "eslint": "^8.8.0",
