@@ -37,8 +37,8 @@ POST http://localhost:3000/api/p/add
 Content-Type: application/json
 
 {
-    "title": "title2",
-    "owner": "620d2bc63ce78a5daf463571",
+    "title": "title4",
+    "owner": "620c54f2faba3f1182ce176f",
     "image": "imagepath"
 }
 

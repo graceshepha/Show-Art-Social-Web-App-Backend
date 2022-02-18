@@ -5,17 +5,11 @@ const { client, DatabaseError } = require('../utils/database');
 const options = {
   lean: true,
   limit: 2,
+  populate: {
+    path: 'owner',
+    select: '_id',
+  },
 };
-
-/**
- *pas sure de comprendre les paginates
- *
- *@author My-Anh Chau
- *
- */
-
-   // nom de la bd artshowcase
-  // nom collection ; posts,tags,users
 
 class PostRepository {
   #model;
@@ -39,7 +33,10 @@ class PostRepository {
         // DUPLICATED
         const [key] = Object.keys(err.keyValue);
         debug(err);
-        throw new DatabaseError(3, `Two post cannot share the same ${key} (${err.keyValue[key]})`, err);
+        throw new DatabaseError(
+          3,
+          `Two post cannot share the same ${key} (${err.keyValue[key]})`,
+        );
       } else {
         // UNKNOWN ERROR
         debug(err);
@@ -60,52 +57,6 @@ class PostRepository {
       throw new DatabaseError();
     }
   }
-/*
-  async updateOne(info) {
-    const post = new this.#model(info);
-    try {
-      await this.#model.updateOne(post);
-      return await post.save();
-    } catch (err) {
-      if (err.name === 'ValidationError') {
-        debug(err);
-        throw err;
-      } else if (err.code === 11000) {
-        const [key] = Object.keys(err.keyValue);
-        debug(err);
-        throw new DatabaseError(3, `Two post cannot share the same ${key} (${err.keyValue[key]})`, err);
-      } else {
-        // UNKNOWN ERROR
-        debug(err);
-        throw new DatabaseError();
-      }
-    }
-  }
-
-  async delOne(info) {
-    const post = new this.#model(info);
-    try {
-      await this.#model.deleteOne(post);
-      // Il faut save
-       return await post.save();
-    } catch (err) {
-      if (err.name === 'ValidationError') {
-        debug(err);
-        throw err;
-      } else if (err.code === 11000) {
-        // DUPLICATED
-        const [key] = Object.keys(err.keyValue);
-        debug(err);
-        throw new DatabaseError(3, `Two post cannot share the same ${key} (${err.keyValue[key]})`, err);
-      } else {
-        // UNKNOWN ERROR
-        debug(err);
-        throw new DatabaseError();
-      }
-    }
-  }
-
-*/
 }
 
 module.exports = new PostRepository();
