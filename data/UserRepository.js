@@ -1,15 +1,12 @@
 // @ts-check
 const debug = require('debug')('backend:database');
+const mongoose = require('mongoose');
 const { client, DatabaseError } = require('../utils/database');
 
 /** @type {import('mongoose').PaginateOptions} */
 const options = {
   lean: true,
-  populate: {
-    path: 'posts',
-    select: '_id',
-  },
-  limit: 2,
+  limit: 5,
 };
 
 /**
@@ -36,12 +33,30 @@ class UserRepository {
     const o = { ...options };
     if (!offset) o.page = page;
     else o.offset = offset;
+    o.populate = 'posts';
 
     try {
-      return await this.#model.paginate({}, o);
+      return await this.#model.paginate({});
     } catch (err) {
       debug(err);
       throw new DatabaseError();
+    }
+  }
+
+  /**
+   * Insert a post `postid` to a user `userid`
+   *
+   * @author Roger Montero
+   */
+  async insertPost(userid, postid) {
+    const user = await this.#model.findById(userid);
+    if (!user) throw new DatabaseError(4);
+    try {
+      user.posts.push(new mongoose.Types.ObjectId(postid));
+      user.save();
+    } catch (err) {
+      debug(err);
+      throw new DatabaseError(1);
     }
   }
 

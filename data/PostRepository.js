@@ -4,11 +4,7 @@ const { client, DatabaseError } = require('../utils/database');
 /** @type {import('mongoose').PaginateOptions} */
 const options = {
   lean: true,
-  limit: 2,
-  populate: {
-    path: 'owner',
-    select: '_id',
-  },
+  limit: 5,
 };
 
 class PostRepository {
@@ -21,6 +17,7 @@ class PostRepository {
 
   async insertOne(info) {
     const post = new this.#model(info);
+    // MUST INSERT POST TO USER ARRAY !!
     // VALIDATE
     try {
       await this.#model.validate(post);
@@ -49,6 +46,7 @@ class PostRepository {
     const o = { ...options };
     if (!offset) o.page = page;
     else o.offset = offset;
+    o.populate = { path: 'owner', select: 'id username' };
 
     try {
       return await this.#model.paginate({}, o);

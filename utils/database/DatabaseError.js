@@ -43,6 +43,8 @@ const errCodes = {
   2: createError('NotConnectedError', 'Database is not connected'),
   /** @readonly DuplicatedUniqueKeyError */
   3: createError('DuplicatedUniqueKeyError', 'There cannot be two documents with the same unique value'),
+  /** @readonly  */
+  4: createError('EntityNotFound', "The object with that criteria doesn't exist in our database"),
 };
 
 /**
