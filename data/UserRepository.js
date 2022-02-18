@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // @ts-check
 const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
@@ -44,8 +45,10 @@ class UserRepository {
   }
 
   /**
-   * Insert a post `postid` to a user `userid`
-   *
+   * Insert a post `postid` to a user `userid``
+   * @param {string | number | import("bson").ObjectID | import("bson").ObjectIdLike | Buffer | Uint8Array} userid
+   // eslint-disable-next-line max-len
+   * @param {string | number | import("bson").ObjectID | import("bson").ObjectIdLike | Buffer | Uint8Array} postid
    * @author Roger Montero
    */
   async insertPost(userid, postid) {

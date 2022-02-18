@@ -8,6 +8,11 @@ GET http://localhost:3000/api/u/
 
 ###
 
+GET http://localhost:3000/api/p/
+    ?page=1
+
+###
+
 POST http://localhost:3000/api/u/add
 Content-Type: application/json
 
@@ -42,10 +47,6 @@ Content-Type: application/json
     "image": "imagepath"
 }
 
-###
-
-
-GET http://localhost/api/p/
 
 
 ###

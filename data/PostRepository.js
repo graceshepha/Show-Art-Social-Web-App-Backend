@@ -1,5 +1,7 @@
+/* eslint-disable no-underscore-dangle */
 const debug = require('debug')('backend:database');
 const { client, DatabaseError } = require('../utils/database');
+const userRepository = require('./UserRepository');
 
 /** @type {import('mongoose').PaginateOptions} */
 const options = {
@@ -18,6 +20,7 @@ class PostRepository {
   async insertOne(info) {
     const post = new this.#model(info);
     // MUST INSERT POST TO USER ARRAY !!
+    userRepository.insertPost(info.owner, info._id);
     // VALIDATE
     try {
       await this.#model.validate(post);
@@ -46,7 +49,7 @@ class PostRepository {
     const o = { ...options };
     if (!offset) o.page = page;
     else o.offset = offset;
-    o.populate = { path: 'owner', select: 'id username' };
+    o.populate = { path: 'owner', select: '_id' };
 
     try {
       return await this.#model.paginate({}, o);
