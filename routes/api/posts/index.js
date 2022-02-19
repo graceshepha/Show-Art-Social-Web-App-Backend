@@ -9,7 +9,7 @@ const postRepository = require('../../../data/PostRepository');
  * @author Bly Grâce Schephatia
  */
 
-const upload = multer({ dest: '../../../images/' });
+const upload = multer({ dest: 'public/images' });
 router.post('/add', upload.single('image'), async (req, res) => {
   try {
     const i = req.body;
@@ -26,7 +26,6 @@ router.post('/add', upload.single('image'), async (req, res) => {
       .json({ status: 400, message: 'Internal Server Error' });
   }
 });
-
 /**
  * @description Cette route retourne tous les posts avec pagination
  * @author Bly, Grâce Schephatia
@@ -46,14 +45,14 @@ router.get('/', async (req, res) => {
 });
 
 /** @description Cette route permet d'obtenir un seul post avec son id /api/p/{postId}  */
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-  } catch (err) {
-    console.error(err);
-    res.status();
-  }
-});
+// router.get('/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//   } catch (err) {
+//     console.error(err);
+//     res.status();
+//   }
+// });
 // /**
 //  *
 //  * @author My-Anh Chau
