@@ -7,6 +7,7 @@ const userRepository = require('./UserRepository');
 const options = {
   lean: true,
   limit: 5,
+  sort: { date: -1 },
 };
 
 class PostRepository {
@@ -49,7 +50,7 @@ class PostRepository {
     const o = { ...options };
     if (!offset) o.page = page;
     else o.offset = offset;
-    o.populate = { path: 'owner', select: '_id' };
+    o.populate = { path: 'owner' };
 
     try {
       return await this.#model.paginate({}, o);

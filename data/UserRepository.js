@@ -3,7 +3,7 @@ const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
 const { client, DatabaseError } = require('../utils/database');
 
-/** @type {import('mongoose').PaginateOptions} */
+/** @type {mongoose.PaginateOptions} */
 const options = {
   lean: true,
   limit: 5,
@@ -26,7 +26,7 @@ class UserRepository {
   /**
    * Trouver tous les documents de la collection
    *
-   * @param {import('mongoose').PaginateOptions} options Options de la pagination
+   * @param {mongoose.PaginateOptions} options Options de la pagination
    * @returns {Promise<Object>} Liste de tous les utilisateurs
    */
   async getAll({ offset, page = 1 }) {
@@ -45,8 +45,8 @@ class UserRepository {
 
   /**
    * Insert a post `postid` to a user `userid`
-   * @param {string|mongoose.Types.ObjectId} userid
-   * @param {string|mongoose.Types.ObjectId} postid
+   * @param {string | mongoose.Types.ObjectId} userid
+   * @param {string | mongoose.Types.ObjectId} postid
    * @author Roger Montero
    */
   async insertPost(userid, postid) {
@@ -66,7 +66,7 @@ class UserRepository {
   /**
    * Insertion d'un utilisateur à la collection
    *
-   * @param {Object<string,*>} info Details d'un utilisateur
+   * @param {import('../types/schemas.types').User} info Details d'un utilisateur
    * @returns {Promise<Object>} Utilisateur créé
    * @throws {ValidationError|DatabaseError}
    */

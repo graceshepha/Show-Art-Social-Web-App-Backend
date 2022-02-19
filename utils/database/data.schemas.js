@@ -5,6 +5,7 @@ const { Schema } = require('mongoose');
 /**
  * Schéma de la collection `users`.
  *
+ * @type {Schema<import('../../types/schemas.types').User>}
  * @author Roger Montero
  */
 const userSchema = new Schema({
@@ -39,11 +40,12 @@ const userSchema = new Schema({
   likedPosts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-});
+}, { id: true });
 userSchema.plugin(paginate);
 /**
  * Schéma de la collection `posts`.
  *
+ * @type {Schema<import('../../types/schemas.types').Post>}
  * @author Roger Montero
  */
 const postSchema = new Schema({
@@ -103,11 +105,12 @@ const postSchema = new Schema({
     },
     comment: { type: String, immutable: true },
   }],
-});
+}, { id: true });
 postSchema.plugin(paginate);
 /**
  * Schéma de la collection `tags`.
  *
+ * @type {Schema<import('../../types/schemas.types').Tag>}
  * @author Roger Montero
  */
 const tagSchema = new Schema({
@@ -119,7 +122,7 @@ const tagSchema = new Schema({
   },
   description: String,
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
-});
+}, { id: true });
 tagSchema.plugin(paginate);
 
 exports.userSchema = userSchema;
