@@ -1,6 +1,9 @@
 const router = require('express').Router();
 const { PaginationParameters } = require('mongoose-paginate-v2');
 const mongoose = require('mongoose');
+const { requiredScopes } = require('express-oauth2-jwt-bearer');
+const { randomBytes } = require('crypto');
+const path = require('path');
 const multer = require('multer');
 const postRepository = require('../../../data/PostRepository');
 
@@ -9,16 +12,24 @@ const postRepository = require('../../../data/PostRepository');
  * @author Bly Grâce Schephatia
  */
 
-const upload = multer({ dest: 'public/images' });
+const storage = multer.diskStorage({
+  destination(_req, _file, cb) {
+    cb(null, 'public/images');
+  },
+  filename(_req, file, cb) {
+    const uniqueSuffix = `${Date.now()}-${randomBytes(32).toString('hex')}`;
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
+
 router.post('/add', upload.single('image'), async (req, res) => {
   try {
     const i = req.body;
     i.owner = mongoose.Types.ObjectId(i.owner);
     i.image = `/assets/images/${req.file.filename}`;
     await postRepository.insertOne(i);
-    return res
-      .status(201)
-      .end();
+    return res.status(201).end();
   } catch (err) {
     console.error(err);
     return res
