@@ -35,7 +35,7 @@ class PostRepository {
         debug(err);
         throw new DatabaseError(
           3,
-          `Two post cannot share the same ${key} (${err.keyValue[key]})`
+          `Two post cannot share the same ${key} (${err.keyValue[key]})`,
         );
       } else {
         // UNKNOWN ERROR
