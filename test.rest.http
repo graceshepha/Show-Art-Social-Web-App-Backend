@@ -46,9 +46,6 @@ Content-Type: application/json
     "image": "imagepath"
 }
 
-
-
 ###
 
 GET http://localhost:8080/api/p/:id
-
