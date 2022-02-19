@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { PaginationParameters } = require('mongoose-paginate-v2');
 const mongoose = require('mongoose');
+const multer = require('multer');
 const postRepository = require('../../../data/PostRepository');
 
 /**
@@ -8,10 +9,12 @@ const postRepository = require('../../../data/PostRepository');
  * @author Bly Grâce Schephatia
  */
 
-router.post('/add', async (req, res) => {
+const upload = multer({ dest: '../../../images/' });
+router.post('/add', upload.single('image'), async (req, res) => {
   try {
     const i = req.body;
     i.owner = mongoose.Types.ObjectId(i.owner);
+    i.image = `/assets/images/${req.file.filename}`;
     await postRepository.insertOne(i);
     return res
       .status(201)
@@ -23,8 +26,10 @@ router.post('/add', async (req, res) => {
       .json({ status: 400, message: 'Internal Server Error' });
   }
 });
+
 /**
  * @description Cette route retourne tous les posts avec pagination
+ * @author Bly, Grâce Schephatia
  */
 router.get('/', async (req, res) => {
   try {

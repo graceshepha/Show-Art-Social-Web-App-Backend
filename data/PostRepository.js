@@ -19,11 +19,11 @@ class PostRepository {
 
   async insertOne(info) {
     const post = new this.#model(info);
-    // MUST INSERT POST TO USER ARRAY !!
-    userRepository.insertPost(info.owner, info._id);
     // VALIDATE
     try {
       await this.#model.validate(post);
+      // MUST INSERT POST TO USER ARRAY !!
+      userRepository.insertPost(post.owner, post._id);
       return await post.save();
     } catch (err) {
       if (err.name === 'ValidationError') {
@@ -35,7 +35,7 @@ class PostRepository {
         debug(err);
         throw new DatabaseError(
           3,
-          `Two post cannot share the same ${key} (${err.keyValue[key]})`,
+          `Two post cannot share the same ${key} (${err.keyValue[key]})`
         );
       } else {
         // UNKNOWN ERROR
