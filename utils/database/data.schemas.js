@@ -5,6 +5,7 @@ const { Schema } = require('mongoose');
 /**
  * Schéma de la collection `users`.
  *
+ * @type {Schema<import('../../types/schemas.types').User>}
  * @author Roger Montero
  */
 const userSchema = new Schema({
@@ -44,6 +45,7 @@ userSchema.plugin(paginate);
 /**
  * Schéma de la collection `posts`.
  *
+ * @type {Schema<import('../../types/schemas.types').Post>}
  * @author Roger Montero
  */
 const postSchema = new Schema({
@@ -108,6 +110,7 @@ postSchema.plugin(paginate);
 /**
  * Schéma de la collection `tags`.
  *
+ * @type {Schema<import('../../types/schemas.types').Tag>}
  * @author Roger Montero
  */
 const tagSchema = new Schema({

@@ -71,7 +71,7 @@ class DatabaseClient {
 
   /**
    * Returns model of a User
-   * @returns {mongoose.PaginateModel<any>} User model
+   * @returns {mongoose.PaginateModel<import('../../types/schemas.types').User>} User model
    * @throws {DatabaseError}
    */
   getUserModel() {
@@ -82,7 +82,7 @@ class DatabaseClient {
 
   /**
    * Returns model of a Post
-   * @returns {mongoose.PaginateModel<any>} Post model
+   * @returns {mongoose.PaginateModel<import('../../types/schemas.types').Post>} Post model
    * @throws {DatabaseError}
    */
   getPostModel() {
@@ -93,7 +93,7 @@ class DatabaseClient {
 
   /**
    * Returns model of a Tag
-   * @returns {mongoose.PaginateModel<any>} Tag model
+   * @returns {mongoose.PaginateModel<import('../../types/schemas.types').Tag>} Tag model
    * @throws {DatabaseError}
    */
   getTagModel() {
