@@ -30,10 +30,10 @@ router.get('/', async (req, res) => {
 router.post('/add', async (req, res) => {
   try {
     const i = req.body;
-    await userRepository.insertOne(i);
+    const user = await userRepository.initialUpsertOne(i);
     return res
-      .status(201)
-      .end();
+      .status(200)
+      .json(user);
   } catch (err) {
     console.error(err);
     return res

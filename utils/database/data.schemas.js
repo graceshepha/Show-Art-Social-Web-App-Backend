@@ -1,6 +1,7 @@
 // @ts-check
-const paginate = require('mongoose-paginate-v2');
 const { Schema } = require('mongoose');
+const paginate = require('mongoose-paginate-v2');
+// const uniqueValidator = require('mongoose-unique-validator');
 
 /**
  * Schéma de la collection `users`.
@@ -12,12 +13,14 @@ const userSchema = new Schema({
   username: {
     type: String,
     unique: true,
+    uniqueCaseInsensitive: true,
     lowercase: true,
     required: [true, 'Username is required'],
   },
   email: {
     type: String,
     unique: true,
+    uniqueCaseInsensitive: true,
     required: [true, 'Email is required'],
     immutable: true,
   },
@@ -41,6 +44,7 @@ const userSchema = new Schema({
   followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 }, { id: true });
+// userSchema.plugin(uniqueValidator, { message: 'Error, expected {PATH} to be unique.' });
 userSchema.plugin(paginate);
 /**
  * Schéma de la collection `posts`.
@@ -106,6 +110,7 @@ const postSchema = new Schema({
     comment: { type: String, immutable: true },
   }],
 }, { id: true });
+// postSchema.plugin(uniqueValidator, { message: 'Error, expected {PATH} to be unique.' });
 postSchema.plugin(paginate);
 /**
  * Schéma de la collection `tags`.
@@ -118,11 +123,13 @@ const tagSchema = new Schema({
     type: String,
     lowercase: true,
     unique: true,
+    uniqueCaseInsensitive: true,
     required: [true, 'Tag needs a name'],
   },
   description: String,
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
 }, { id: true });
+// tagSchema.plugin(uniqueValidator, { message: 'Error, expected {PATH} to be unique.' });
 tagSchema.plugin(paginate);
 
 exports.userSchema = userSchema;
