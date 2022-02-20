@@ -1,11 +1,11 @@
 const router = require('express').Router();
 const { PaginationParameters } = require('mongoose-paginate-v2');
 const mongoose = require('mongoose');
-const { requiredScopes } = require('express-oauth2-jwt-bearer');
 const { randomBytes } = require('crypto');
 const path = require('path');
 const multer = require('multer');
 const postRepository = require('../../../data/PostRepository');
+const checkJwt = require('../../../utils/checkJwt');
 
 /**
  * @description ROUTE POUR AJOUTER UN POST
@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.post('/add', upload.single('image'), async (req, res) => {
+router.post('/add', checkJwt, upload.single('image'), async (req, res) => {
   try {
     const i = req.body;
     i.owner = mongoose.Types.ObjectId(i.owner);
