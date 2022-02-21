@@ -1,19 +1,19 @@
-GET http://localhost:3000/api/u/
+GET http://localhost:8080/api/u/
     ?page=1
 
 ###
 
-GET http://localhost:3000/api/u/
+GET http://localhost:8080/api/u/
     ?offset=2
 
 ###
 
-GET http://localhost:3000/api/p/
+GET http://localhost:8080/api/p/
     ?page=1
 
 ###
 
-POST http://localhost:3000/api/u/add
+POST http://localhost:8080/api/u/add
 Content-Type: application/json
 
 {
@@ -23,7 +23,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:3000/api/u/add
+POST http://localhost:8080/api/u/add
 Content-Type: application/json
 
 {
