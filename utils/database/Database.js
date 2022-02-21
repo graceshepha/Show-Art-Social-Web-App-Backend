@@ -64,9 +64,9 @@ class DatabaseClient {
   /** Create and initialize models */
   #initModels() {
     // Init just in case
-    this.getUserModel().init();
-    this.getPostModel().init();
-    this.getTagModel().init();
+    this.getUserModel();
+    this.getPostModel();
+    this.getTagModel();
   }
 
   /**

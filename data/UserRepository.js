@@ -9,6 +9,8 @@ const options = {
   limit: 5,
 };
 
+const withRandom = (str) => `${str}-${Math.floor(100000 + Math.random() * 900000)}`;
+
 /**
  * Dépot d'un utilisateur qui possède tous les fonctions pour CRUD
  * d'un utilisateur dans l'application.
@@ -70,11 +72,24 @@ class UserRepository {
    * @returns {Promise<Object>} Utilisateur créé
    * @throws {ValidationError|DatabaseError}
    */
-  async insertOne(info) {
-    let user = await this.#model.findOne({ email: info.email });
-    if (!user) user = new this.#model(info);
-    else user.set(info);
-    // VALIDATE
+  async initialUpsertOne(info) {
+    const userDetails = { ...info };
+    let user = await this.#model.findOne({ email: userDetails.email });
+    if (user) delete userDetails.username; // no need to add username
+    else {
+      // new user
+      const test = await this.#model.findOne({ username: userDetails.username });
+      if (test) {
+        // username already taken, so create a new temp one
+        return this.initialUpsertOne({
+          ...userDetails,
+          username: withRandom(userDetails.username),
+        });
+      }
+      user = new this.#model();
+    }
+
+    user.set(userDetails);
     try {
       await this.#model.validate(user);
       return await user.save();
