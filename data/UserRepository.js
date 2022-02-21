@@ -1,13 +1,20 @@
 // @ts-check
 const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
-const { client, DatabaseError } = require('../utils/database');
+const client = require('../utils/database');
+const { UnknownError, DuplicatedUniqueError, EntityNotFound } = require('../utils/errors');
+/**
+ * @typedef {import('../types/schemas.types').User} User
+ */
 
 /** @type {mongoose.PaginateOptions} */
 const options = {
   lean: true,
   limit: 5,
 };
+
+/** @param {string} str */
+const withRandom = (str) => `${str}-${Math.floor(100000 + Math.random() * 900000)}`;
 
 /**
  * Dépot d'un utilisateur qui possède tous les fonctions pour CRUD
@@ -39,42 +46,57 @@ class UserRepository {
       return await this.#model.paginate({}, o);
     } catch (err) {
       debug(err);
-      throw new DatabaseError();
+      throw UnknownError(err.message);
     }
   }
 
   /**
-   * Insert a post `postid` to a user `userid`
-   * @param {string | mongoose.Types.ObjectId} userid
-   * @param {string | mongoose.Types.ObjectId} postid
+   * Insertion d'un post à un utilisateur
+   *
+   * @param {string | mongoose.Types.ObjectId} userid Id d'un utilisateur
+   * @param {string | mongoose.Types.ObjectId} postid Id du post à ajouter
+   * @throws {ValidationError|CustomError}
    * @author Roger Montero
    */
   async insertPost(userid, postid) {
     if (!userid || !postid) throw new Error('Id cannot be null');
 
     const user = await this.#model.findById(userid);
-    if (!user) throw new DatabaseError(4);
+    if (!user) throw EntityNotFound();
     try {
       user.posts.push(new mongoose.Types.ObjectId(postid));
       user.save();
     } catch (err) {
       debug(err);
-      throw new DatabaseError(1);
+      throw UnknownError();
     }
   }
 
   /**
    * Insertion d'un utilisateur à la collection
    *
-   * @param {import('../types/schemas.types').User} info Details d'un utilisateur
-   * @returns {Promise<Object>} Utilisateur créé
-   * @throws {ValidationError|DatabaseError}
+   * @param {User} info Details d'un utilisateur
+   * @returns {Promise<mongoose.Document<User>>} Utilisateur créé
+   * @throws {ValidationError|CustomError}
    */
-  async insertOne(info) {
-    let user = await this.#model.findOne({ email: info.email });
-    if (!user) user = new this.#model(info);
-    else user.set(info);
-    // VALIDATE
+  async initialUpsertOne(info) {
+    const userDetails = { ...info };
+
+    let user = await this.findByEmail(info.email);
+    if (!user) {
+      // new user
+      const test = await this.findByUsername(info.username);
+      if (test) {
+        // username already taken, so create a new temp username
+        return this.initialUpsertOne({
+          ...info,
+          username: withRandom(info.username),
+        });
+      }
+      user = new this.#model(); // new user
+    } else delete userDetails.username; // no need to readd username
+
+    user.set(userDetails);
     try {
       await this.#model.validate(user);
       return await user.save();
@@ -84,18 +106,32 @@ class UserRepository {
         throw err;
       } else if (err.code === 11000) {
         // DUPLICATED
-        const [key] = Object.keys(err.keyValue);
         debug(err);
-        throw new DatabaseError(
-          3,
-          `Two users cannot share the same ${key} (${err.keyValue[key]})`,
-        );
+        const keys = Object.keys(err.keyValue);
+        const arr = keys.map((k) => `${k} (${err.keyValue[k]})`);
+        throw DuplicatedUniqueError(`Users cannot share the same ${arr.join(', ')}`);
       } else {
         // UNKNOWN ERROR
         debug(err);
-        throw new DatabaseError();
+        throw UnknownError();
       }
     }
+  }
+
+  /**
+   * @param {string} email Courriel de l'utilisateur
+   * @returns {Promise<mongoose.Document<User>>}
+   */
+  async findByEmail(email) {
+    return this.#model.findOne({ email });
+  }
+
+  /**
+   * @param {string} username Username de l'utilisateur
+   * @returns {Promise<mongoose.Document<User>>}
+   */
+  async findByUsername(username) {
+    return this.#model.findOne({ username });
   }
 }
 

@@ -1,9 +1,18 @@
 // @ts-check
 const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
-const DatabaseError = require('./DatabaseError');
+const { NotConnectedError } = require('../errors');
 const schemas = require('./data.schemas');
 
+/**
+ * @typedef {import('../../types/schemas.types').User} User
+ */
+/**
+ * @typedef {import('../../types/schemas.types').Post} Post
+ */
+/**
+ * @typedef {import('../../types/schemas.types').Tag} Tag
+ */
 /**
  * Objet client de la base de donnée qui facilite la création des
  * modèles pour chaque collection de la base de données.
@@ -45,7 +54,7 @@ class DatabaseClient {
     this.#client = mongoose.createConnection(uri, { dbName, maxPoolSize: 2 });
 
     // handle error
-    this.#client.once('connected', async () => {
+    this.#client.once('connected', () => {
       debug('Connection successful');
       this.#connected = true;
       this.#initModels();
@@ -64,40 +73,40 @@ class DatabaseClient {
   /** Create and initialize models */
   #initModels() {
     // Init just in case
-    this.getUserModel().init();
-    this.getPostModel().init();
-    this.getTagModel().init();
+    this.getUserModel();
+    this.getPostModel();
+    this.getTagModel();
   }
 
   /**
    * Returns model of a User
-   * @returns {mongoose.PaginateModel<import('../../types/schemas.types').User>} User model
+   * @returns {mongoose.PaginateModel<User>} User model
    * @throws {DatabaseError}
    */
   getUserModel() {
-    if (!this.isConnected) throw new DatabaseError(2);
+    if (!this.isConnected) throw NotConnectedError();
     // @ts-ignore
     return this.#client.model('User', schemas.userSchema);
   }
 
   /**
    * Returns model of a Post
-   * @returns {mongoose.PaginateModel<import('../../types/schemas.types').Post>} Post model
+   * @returns {mongoose.PaginateModel<Post>} Post model
    * @throws {DatabaseError}
    */
   getPostModel() {
-    if (!this.isConnected) throw new DatabaseError(2);
+    if (!this.isConnected) throw NotConnectedError();
     // @ts-ignore
     return this.#client.model('Post', schemas.postSchema);
   }
 
   /**
    * Returns model of a Tag
-   * @returns {mongoose.PaginateModel<import('../../types/schemas.types').Tag>} Tag model
+   * @returns {mongoose.PaginateModel<Tag>} Tag model
    * @throws {DatabaseError}
    */
   getTagModel() {
-    if (!this.isConnected) throw new DatabaseError(2);
+    if (!this.isConnected) throw NotConnectedError();
     // @ts-ignore
     return this.#client.model('Tag', schemas.tagSchema);
   }

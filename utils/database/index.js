@@ -1,6 +1,4 @@
 // @ts-check
-const DatabaseClient = require('./Database');
-const DatabaseError = require('./DatabaseError');
+const DatabaseClient = require('./database');
 
-exports.client = new DatabaseClient();
-exports.DatabaseError = DatabaseError;
+module.exports = new DatabaseClient();
