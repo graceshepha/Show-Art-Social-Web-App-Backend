@@ -8,7 +8,8 @@ const postRepository = require('../../../data/PostRepository');
 const checkJwt = require('../../../utils/checkJwt');
 
 /**
- * @description ROUTE POUR AJOUTER UN POST
+ * Cette route ajoute un post
+ *
  * @author Bly Grâce Schephatia
  */
 
@@ -23,7 +24,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.post('/add', checkJwt, upload.single('image'), async (req, res) => {
+router.post('/', checkJwt, upload.single('image'), async (req, res) => {
   try {
     const i = req.body;
     i.owner = mongoose.Types.ObjectId(i.owner);
@@ -37,8 +38,10 @@ router.post('/add', checkJwt, upload.single('image'), async (req, res) => {
       .json({ status: 400, message: 'Internal Server Error' });
   }
 });
+
 /**
- * @description Cette route retourne tous les posts avec pagination
+ * Cette route retourne tous les posts avec pagination
+ *
  * @author Bly, Grâce Schephatia
  */
 router.get('/', async (req, res) => {

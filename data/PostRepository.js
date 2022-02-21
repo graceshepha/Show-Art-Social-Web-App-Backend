@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 const debug = require('debug')('backend:database');
-const { client, DatabaseError } = require('../utils/database');
+const client = require('../utils/database');
+const { DuplicatedUniqueError, UnknownError } = require('../utils/errors');
 const userRepository = require('./UserRepository');
 
 /** @type {import('mongoose').PaginateOptions} */
@@ -32,16 +33,14 @@ class PostRepository {
         throw err;
       } else if (err.code === 11000) {
         // DUPLICATED
-        const [key] = Object.keys(err.keyValue);
         debug(err);
-        throw new DatabaseError(
-          3,
-          `Two post cannot share the same ${key} (${err.keyValue[key]})`,
-        );
+        const keys = Object.keys(err.keyValue);
+        const arr = keys.map((k) => `${k} (${err.keyValue[k]})`);
+        throw DuplicatedUniqueError(`Posts cannot share the same ${arr.join(', ')}`);
       } else {
         // UNKNOWN ERROR
         debug(err);
-        throw new DatabaseError();
+        throw UnknownError();
       }
     }
   }
@@ -56,7 +55,7 @@ class PostRepository {
       return await this.#model.paginate({}, o);
     } catch (err) {
       debug(err);
-      throw new DatabaseError();
+      throw UnknownError();
     }
   }
 }

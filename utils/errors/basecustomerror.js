@@ -43,7 +43,7 @@ const errCodes = {
   2: createError('NotConnectedError', 'Database is not connected'),
   /** @readonly DuplicatedUniqueKeyError */
   3: createError('DuplicatedUniqueKeyError', 'There cannot be two documents with the same unique value'),
-  /** @readonly  */
+  /** @readonly EntityNotFound */
   4: createError('EntityNotFound', "The object with that criteria doesn't exist in our database"),
 };
 
@@ -53,9 +53,9 @@ const errCodes = {
  * @extends Error
  * @author Roger Montero
  */
-class DatabaseError extends Error {
+class CustomError extends Error {
   /** @type {string} */
-  name = 'DatabaseError';
+  name = 'CustomError';
 
   /** @type {Date} */
   date;
@@ -64,37 +64,35 @@ class DatabaseError extends Error {
   message;
 
   /** @type {number} */
-  errCode;
+  code;
 
   /** @type {ErrObject} */
   error;
 
   /**
    * @constructor
-   * @param {number} [err=1] Error code
-   * @param {string} [path] Path where the error occured
+   * @param {number} [code=1] Error code
    */
-  constructor(err = 1, path = undefined, ...params) {
+  constructor(code = 1, ...params) {
     // Pass remaining arguments (including vendor specific ones) to parent constructor
     super(...params);
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, DatabaseError);
+      Error.captureStackTrace(this, CustomError);
     }
     // Get values with params
-    const o = errCodes[err] ? errCodes[err] : errCodes[1];
-    const m = !this.message ? o.message : this.message;
+    const error = errCodes[code] ? errCodes[code] : errCodes[1];
+    const msg = !this.message ? error.message : this.message;
 
     this.date = new Date();
-    this.message = m;
-    this.errCode = err;
+    this.message = msg;
+    this.code = code;
     this.error = {
-      type: o.type,
-      path,
-      message: m,
+      ...error,
+      message: msg,
     };
   }
 }
 
-module.exports = DatabaseError;
+module.exports = CustomError;
