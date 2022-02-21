@@ -51,7 +51,18 @@ router.post('/', checkJwt, upload.single('image'), async (req, res, next) => {
   }
 });
 
+// ESSAYER DE CONTINUER TRUC DE GRACE
+
 /** @description Cette route permet d'obtenir un seul post avec son id /api/p/{postId}  */
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await postRepository.getOne(id);
+  } catch (err) {
+    console.error(err);
+    res.status();
+  }
+});
 // router.get('/:id', async (req, res) => {
 //   try {
 //     const { id } = req.params;
