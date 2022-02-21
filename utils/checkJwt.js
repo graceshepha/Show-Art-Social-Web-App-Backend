@@ -7,11 +7,3 @@ module.exports = auth({
   audience: process.env.AUDIENCE,
   tokenSigningAlg: 'RS256',
 });
-
-// si le code en haut ne fonctionne pas
-// module.exports = auth({
-//   jwksUri: process.env.JWKS_URI,
-//   issuer: process.env.ISSUER,
-//   audience: process.env.AUDIENCE,
-//   tokenSigningAlg: 'RS256',
-// });

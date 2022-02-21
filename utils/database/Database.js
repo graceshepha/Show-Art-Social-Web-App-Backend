@@ -54,7 +54,7 @@ class DatabaseClient {
     this.#client = mongoose.createConnection(uri, { dbName, maxPoolSize: 2 });
 
     // handle error
-    this.#client.once('connected', async () => {
+    this.#client.once('connected', () => {
       debug('Connection successful');
       this.#connected = true;
       this.#initModels();

@@ -8,38 +8,6 @@ const postRepository = require('../../../data/PostRepository');
 const checkJwt = require('../../../utils/checkJwt');
 
 /**
- * Cette route ajoute un post
- *
- * @author Bly Grâce Schephatia
- */
-
-const storage = multer.diskStorage({
-  destination(_req, _file, cb) {
-    cb(null, 'public/images');
-  },
-  filename(_req, file, cb) {
-    const uniqueSuffix = `${Date.now()}-${randomBytes(32).toString('hex')}`;
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage });
-
-router.post('/', checkJwt, upload.single('image'), async (req, res) => {
-  try {
-    const i = req.body;
-    i.owner = mongoose.Types.ObjectId(i.owner);
-    i.image = `/assets/images/${req.file.filename}`;
-    await postRepository.insertOne(i);
-    return res.status(201).end();
-  } catch (err) {
-    console.error(err);
-    return res
-      .status(400)
-      .json({ status: 400, message: 'Internal Server Error' });
-  }
-});
-
-/**
  * Cette route retourne tous les posts avec pagination
  *
  * @author Bly, Grâce Schephatia
@@ -50,6 +18,37 @@ router.get('/', async (req, res) => {
       new PaginationParameters(req).getOptions(),
     );
     return res.status(200).json(posts);
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(400)
+      .json({ status: 400, message: 'Internal Server Error' });
+  }
+});
+
+const storage = multer.diskStorage({
+  destination(_req, _file, cb) {
+    cb(null, 'public/images');
+  },
+  filename(_req, file, cb) {
+    const uniqueSuffix = `${Date.now()}-${randomBytes(10).toString('hex')}`;
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
+
+/**
+ * Cette route ajoute un post
+ *
+ * @author Bly Grâce Schephatia
+ */
+router.post('/', checkJwt, upload.single('image'), async (req, res) => {
+  try {
+    const i = req.body;
+    i.owner = mongoose.Types.ObjectId(i.owner);
+    i.image = `/assets/images/${req.file.filename}`;
+    await postRepository.insertOne(i);
+    return res.status(201).end();
   } catch (err) {
     console.error(err);
     return res
