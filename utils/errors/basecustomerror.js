@@ -2,8 +2,8 @@
 /**
  * @typedef {Object} ErrObject
  * @property {string} type
- * @property {string} [path]
  * @property {string} message
+ * @property {number} status
  */
 
 /**
@@ -11,10 +11,11 @@
  *
  * @param {string} t - Type of the error
  * @param {string} m - Message of the error
+ * @param {number} s - Status code to return
  * @returns {ErrObject} Object of the error
  * @author Roger Montero
  */
-function createError(t, m) {
+function createError(t, m, s) {
   return {
     /**
       * @type {string}
@@ -27,6 +28,13 @@ function createError(t, m) {
      * @readonly
      */
     message: m,
+
+    /**
+     * @type {number}
+     * @readonly
+     */
+    status: s,
+
   };
 }
 
@@ -38,13 +46,15 @@ function createError(t, m) {
  */
 const errCodes = {
   /** @readonly UnknownError */
-  1: createError('UnknownError', 'Unknown error occured in the database'),
+  1: createError('Unknown', 'Unknown error occured in the database', 500),
   /** @readonly NotConnectedError */
-  2: createError('NotConnectedError', 'Database is not connected'),
+  2: createError('NotConnected', 'Database is not connected', 500),
   /** @readonly DuplicatedUniqueKeyError */
-  3: createError('DuplicatedUniqueKeyError', 'There cannot be two documents with the same unique value'),
+  3: createError('DuplicatedUnique', 'There cannot be two documents with the same unique value', 400),
   /** @readonly EntityNotFound */
-  4: createError('EntityNotFound', "The object with that criteria doesn't exist in our database"),
+  4: createError('KeyInvalidFormat', 'Cast to type required failed for value given', 400),
+  /** @readonly EntityNotFound */
+  5: createError('EntityNotFound', "The object with that criteria doesn't exist in our database", 404),
 };
 
 /**
@@ -83,14 +93,16 @@ class CustomError extends Error {
     }
     // Get values with params
     const error = errCodes[code] ? errCodes[code] : errCodes[1];
-    const msg = !this.message ? error.message : this.message;
+    const msg = !params[0] ? error.message : params[0];
 
     this.date = new Date();
     this.message = msg;
     this.code = code;
+    this.statusCode = error.status;
     this.error = {
       ...error,
       message: msg,
+      status: undefined,
     };
   }
 }

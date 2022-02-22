@@ -1,9 +1,8 @@
 // @ts-check
 const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
-const { NotConnectedError } = require('../errors');
+const { NotConnected } = require('../errors');
 const schemas = require('./data.schemas');
-
 /**
  * @typedef {import('../../types/schemas.types').User} User
  */
@@ -13,6 +12,7 @@ const schemas = require('./data.schemas');
 /**
  * @typedef {import('../../types/schemas.types').Tag} Tag
  */
+
 /**
  * Objet client de la base de donnée qui facilite la création des
  * modèles pour chaque collection de la base de données.
@@ -84,7 +84,7 @@ class DatabaseClient {
    * @throws {DatabaseError}
    */
   getUserModel() {
-    if (!this.isConnected) throw NotConnectedError();
+    if (!this.isConnected) throw NotConnected();
     // @ts-ignore
     return this.#client.model('User', schemas.userSchema);
   }
@@ -95,7 +95,7 @@ class DatabaseClient {
    * @throws {DatabaseError}
    */
   getPostModel() {
-    if (!this.isConnected) throw NotConnectedError();
+    if (!this.isConnected) throw NotConnected();
     // @ts-ignore
     return this.#client.model('Post', schemas.postSchema);
   }
@@ -106,7 +106,7 @@ class DatabaseClient {
    * @throws {DatabaseError}
    */
   getTagModel() {
-    if (!this.isConnected) throw NotConnectedError();
+    if (!this.isConnected) throw NotConnected();
     // @ts-ignore
     return this.#client.model('Tag', schemas.tagSchema);
   }

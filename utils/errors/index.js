@@ -10,16 +10,22 @@ exports.UnknownError = (message, ...params) => new CustomError(1, message, ...pa
  * @param {string} [message] Message de l'erreur
  * @author Roger Montero
  */
-exports.NotConnectedError = (message, ...params) => new CustomError(2, message, ...params);
+exports.NotConnected = (message, ...params) => new CustomError(2, message, ...params);
 
 /**
  * @param {string} [message] Message de l'erreur
  * @author Roger Montero
  */
-exports.DuplicatedUniqueError = (message, ...params) => new CustomError(3, message, ...params);
+exports.DuplicatedUnique = (message, ...params) => new CustomError(3, message, ...params);
 
 /**
  * @param {string} [message] Message de l'erreur
  * @author Roger Montero
  */
-exports.EntityNotFound = (message, ...params) => new CustomError(4, message, ...params);
+exports.InvalidKey = (message, ...params) => new CustomError(4, message, ...params);
+
+/**
+ * @param {string} [message] Message de l'erreur
+ * @author Roger Montero
+ */
+exports.EntityNotFound = (message, ...params) => new CustomError(5, message, ...params);
