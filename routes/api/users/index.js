@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { PaginationParameters } = require('mongoose-paginate-v2');
 const userRepository = require('../../../data/UserRepository');
-const checkJwt = require('../../../utils/checkJwt');
+const checkJwt = require('../../../utils/middleware/checkJwt');
 /**
  *
  * @author My-Anh Chau
@@ -13,17 +13,13 @@ const checkJwt = require('../../../utils/checkJwt');
  *
  * @author Roger Montero
  */
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
     const users = await userRepository.getAll(new PaginationParameters(req).getOptions());
-    return res
-      .status(200)
+    res.status(200)
       .json(users);
   } catch (err) {
-    console.error(err);
-    return res
-      .status(400)
-      .json({ status: 400, message: 'Internal Server Error' });
+    next(err);
   }
 });
 
@@ -33,22 +29,16 @@ router.get('/', async (req, res) => {
  *
  * @author Roger Montero
  */
-router.post('/login', checkJwt, async (req, res) => {
+router.post('/login', checkJwt, async (req, res, next) => {
   const { body } = req;
-  const emailAuth = req.auth.payload['http://localhost//email'];
-  if (body.email !== emailAuth) {
-    return res.sendStatus(401);
-  }
+  body.email = req.auth.payload['http://localhost//email'];
   try {
     const user = await userRepository.initialUpsertOne(body);
-    return res
+    res
       .status(200)
       .json(user);
   } catch (err) {
-    console.error(err);
-    return res
-      .status(400)
-      .json({ status: 400, message: 'Internal Server Error' });
+    next(err);
   }
 });
 
