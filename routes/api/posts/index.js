@@ -6,6 +6,7 @@ const path = require('path');
 const multer = require('multer');
 const postRepository = require('../../../data/PostRepository');
 const checkJwt = require('../../../utils/checkJwt');
+const { EntityNotFound } = require('../../../utils/errors');
 
 /**
  * Cette route retourne tous les posts avec pagination
@@ -57,90 +58,23 @@ router.post('/', checkJwt, upload.single('image'), async (req, res) => {
   }
 });
 
-// ESSAYER DE CONTINUER TRUC DE GRACE
+// Continuer, Details d'un post: Méthode /api/p/{postId}
 
 /** @description Cette route permet d'obtenir un seul post avec son id /api/p/{postId}  */
 router.get('/:id', async (req, res) => {
   try {
+  // on get le id
     const { id } = req.params;
     const post = await postRepository.getOne(id);
+    // si post existe pas ou a pas de nbr de string correspondant
+    if (!post) throw EntityNotFound();
+    return res.status(200).json(post);
   } catch (err) {
     console.error(err);
-    res.status();
+    return res
+      .status(400)
+      .json({ status: 400, message: 'Internal Server Error' });
   }
 });
-// router.get('/:id', async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//   } catch (err) {
-//     console.error(err);
-//     res.status();
-//   }
-// });
-// /**
-//  *
-//  * @author My-Anh Chau
-//  *
-//  */
-
-// // ROUTE POUR GET LES POSTS
-// router.get("/", async (req, res) => {
-//   try {
-//     const items = await getToutPosts(req.userId);
-//     res.status(200).json(items);
-//   } catch {
-//     res.status(500).json({ status: 500, message: "Internal Server Error" });
-//   }
-// });
-
-// // ROUTE POUR GET UN POST AVEC ID
-// router.get("/:idPost", async (req, res) => {
-//   const { idPost, idTag } = req.query;
-//   try {
-//     if (!idPost || !idTag) {
-//       res.status(400).json({ status: 400, message: "Bad Request" });
-//     } else {
-//       await addPost({ idUtilisateur: req.userId, idPost, idTag });
-//       res.status(200).end();
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ status: 500, message: "Internal Server Error" });
-//   }
-// });
-
-// // ROUTE POUR AJOUTER UN POST
-// router.post("/", async (req, res) => {
-//   const { idPost, idTag } = req.query;
-//   try {
-//     if (!idPost || !idTag) {
-//       res.status(400).json({ status: 400, message: 'Bad Request' });
-//     } else {
-//       await addPost({ idUtilisateur: req.userId, idPost, idTag });
-//       res.status(200).end();
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ status: 500, message: 'Internal Server Error' });
-//   }
-// });
-
-// // ROUTE POUR ENLEVER UN POST
-// router.delete("/p", async (req, res) => {
-//   const { idPost, idTag } = req.query;
-//   try {
-//     if (!idPost || !idTag) {
-//       res.status(400).json({ status: 400, message: 'Bad Request' });
-//     } else {
-//       await removePost({
-//         idUtilisateur: req.userId,
-//         idPost,
-//       });
-//       res.status(200).end();
-//     }
-//   } catch {
-//     res.status(500).json({ status: 500, message: 'Internal Server Error' });
-//   }
-// });
 
 module.exports = router;

@@ -45,6 +45,23 @@ class PostRepository {
     }
   }
 
+  // mettre dans post les informations de un post specifique avec le id
+  // AJOUTER PAR MYANH
+  async getOne(id) {
+    // faire un trycatch avec un string qui doit etre sup a 24
+    // catch les erreurs possibles
+    try {
+    // prendre obj selon le id
+      const post = await this.#model.findById(id).exec();
+      return post;
+    } catch (err) {
+      debug(err);
+      throw UnknownError();
+      // raison qui peut avoir une erreur
+      // que sa soit pas assez de string
+    }
+  }
+
   async getAll({ offset, page = 1 }) {
     const o = { ...options };
     if (!offset) o.page = page;
