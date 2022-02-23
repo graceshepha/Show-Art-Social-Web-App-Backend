@@ -21,6 +21,7 @@ class PostRepository {
   }
 
   /**
+   * @author My-Anh Chau
    * @author Bly Grâce Schephatia
    */
   async insertOne(info) {
@@ -52,6 +53,9 @@ class PostRepository {
   // PostRepo: addLike(userid) / removeLike(userid)
   // userid = celui qui a like
 
+  /**
+   * @author My-Anh Chau
+   */
   async addLike(userid) {
     try {
       // Inserer un like
@@ -66,6 +70,9 @@ class PostRepository {
     }
   }
 
+  /**
+   * @author My-Anh Chau
+   */
   async removeLike(userid) {
     try {
       // prendre obj du post de lutilisateur
@@ -79,7 +86,9 @@ class PostRepository {
     }
   }
 
-  // mettre dans post les informations de un post specifique avec le id
+  /**
+   * @author My-Anh Chau
+   */
   async getOne(id) {
     // faire un trycatch avec un string qui doit etre sup a 24
     // catch les erreurs possibles

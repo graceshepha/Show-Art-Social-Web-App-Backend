@@ -51,12 +51,9 @@ class UserRepository {
   }
 
   // UserRepo: addLikedPost(postid) / removeLikedPost(postid)
-  /*
-  *
-  * @author My-Anh Chau
-  *
-  */
-
+  /**
+   * @author My-Anh Chau
+   */
   // Insertion dun likes a un utilisateur
   async addLikedPost(postid) {
     // objet d'un utilisateur qui a post
@@ -73,6 +70,9 @@ class UserRepository {
     }
   }
 
+  /**
+   * @author My-Anh Chau
+   */
   async removeLikedPost(postid) {
     if (!postid) throw new Error('Id cannot be null');
     // objet d'un utilisateur qui a post
