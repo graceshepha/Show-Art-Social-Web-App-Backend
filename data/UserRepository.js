@@ -50,6 +50,43 @@ class UserRepository {
     }
   }
 
+  // UserRepo: addLikedPost(postid) / removeLikedPost(postid)
+  /*
+  *
+  * @author My-Anh Chau
+  *
+  */
+
+  // Insertion dun likes a un utilisateur
+  async addLikedPost(postid) {
+    // objet d'un utilisateur qui a post
+    if (!postid) throw new Error('Id cannot be null');
+    // obj du user qui obtien un like
+    const user = await this.#model.findById(postid);
+    // apelle de la fonct bd pr ajouter
+    try {
+      user.likedPosts.push(new mongoose.Types.ObjectId(postid));
+      user.save();
+    } catch (err) {
+      debug(err);
+      throw UnknownError();
+    }
+  }
+
+  async removeLikedPost(postid) {
+    if (!postid) throw new Error('Id cannot be null');
+    // objet d'un utilisateur qui a post
+    const user = await this.#model.findById(postid).exec();
+    // apelle de la fonct bd pr ajouter
+    try {
+      user.likedPosts.splice(new mongoose.Types.ObjectId(postid));
+      user.save();
+    } catch (err) {
+      debug(err);
+      throw UnknownError();
+    }
+  }
+
   /**
    * Insertion d'un post à un utilisateur
    *

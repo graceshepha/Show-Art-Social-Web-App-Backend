@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const debug = require('debug')('backend:database');
+const mongoose = require('mongoose');
 const client = require('../utils/database');
 const { DuplicatedUniqueError, UnknownError } = require('../utils/errors');
 const userRepository = require('./UserRepository');
@@ -19,6 +20,11 @@ class PostRepository {
     this.#model = client.getPostModel();
   }
 
+  /*
+  *
+  * @author My-Anh Chau
+  *
+  */
   async insertOne(info) {
     const post = new this.#model(info);
     // VALIDATE
@@ -45,8 +51,37 @@ class PostRepository {
     }
   }
 
+  // PostRepo: addLike(userid) / removeLike(userid)
+  // userid = celui qui a like
+
+  async addLike(userid) {
+    try {
+      // Inserer un like
+      const post = await this.#model.findById(userid).exec();
+      // insert user to the like array qui sapelle likedPosts
+      userRepository.addLikedPost(post);
+      // fo ajouter lutilisateur qui a le like et celui qui like
+      this.#model.likes.push(new mongoose.Types.ObjectId(userid));
+      this.#model.save();
+    } catch (err) {
+      throw UnknownError();
+    }
+  }
+
+  async removeLike(userid) {
+    try {
+      // prendre obj du post de lutilisateur
+      const post = await this.#model.findById(userid).exec();
+      // remove user to the like array qui sapelle likedPosts
+      this.#model.likes.splice(new mongoose.Types.ObjectId(userid));
+      this.#model.save();
+      userRepository.removeLikedPost(post);
+    } catch (err) {
+      throw UnknownError();
+    }
+  }
+
   // mettre dans post les informations de un post specifique avec le id
-  // AJOUTER PAR MYANH
   async getOne(id) {
     // faire un trycatch avec un string qui doit etre sup a 24
     // catch les erreurs possibles
