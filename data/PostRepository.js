@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const debug = require('debug')('backend:database');
+const mongoose = require('mongoose');
 const client = require('../utils/database');
 const { DuplicatedUnique, UnknownError, InvalidKey } = require('../utils/errors');
 const userRepository = require('./UserRepository');
@@ -19,9 +20,17 @@ class PostRepository {
     this.#model = client.getPostModel();
   }
 
+<<<<<<< HEAD
+  /*
+  *
+  * @author My-Anh Chau
+  *
+  */
+=======
   /**
    * @author Bly Grâce Schephatia
    */
+>>>>>>> bb7e29200a3fbeb1e239d8283b5c16901f6ca0be
   async insertOne(info) {
     const post = new this.#model(info);
     // VALIDATE
@@ -49,11 +58,46 @@ class PostRepository {
     }
   }
 
+<<<<<<< HEAD
+  // PostRepo: addLike(userid) / removeLike(userid)
+  // userid = celui qui a like
+
+  async addLike(userid) {
+    try {
+      // Inserer un like
+      const post = await this.#model.findById(userid).exec();
+      // insert user to the like array qui sapelle likedPosts
+      userRepository.addLikedPost(post);
+      // fo ajouter lutilisateur qui a le like et celui qui like
+      this.#model.likes.push(new mongoose.Types.ObjectId(userid));
+      this.#model.save();
+    } catch (err) {
+      throw UnknownError();
+    }
+  }
+
+  async removeLike(userid) {
+    try {
+      // prendre obj du post de lutilisateur
+      const post = await this.#model.findById(userid).exec();
+      // remove user to the like array qui sapelle likedPosts
+      this.#model.likes.splice(new mongoose.Types.ObjectId(userid));
+      this.#model.save();
+      userRepository.removeLikedPost(post);
+    } catch (err) {
+      throw UnknownError();
+    }
+  }
+
+  // mettre dans post les informations de un post specifique avec le id
+  async getOne(id) {
+=======
   /**
    * @author My-Anh Chau
    */
   async findById(id) {
     // mettre dans post les informations de un post specifique avec le id
+>>>>>>> bb7e29200a3fbeb1e239d8283b5c16901f6ca0be
     // faire un trycatch avec un string qui doit etre sup a 24
     // catch les erreurs possibles
     try {
