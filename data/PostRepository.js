@@ -7,7 +7,7 @@ const userRepository = require('./UserRepository');
 /** @type {import('mongoose').PaginateOptions} */
 const options = {
   lean: true,
-  limit: 5,
+  limit: 1,
   sort: { date: -1 },
 };
 
@@ -29,6 +29,7 @@ class PostRepository {
       await this.#model.validate(post);
       // MUST INSERT POST TO USER ARRAY !!
       userRepository.insertPost(post.owner, post._id);
+      console.log(post.owner);
       return await post.save();
     } catch (err) {
       if (err.name === 'ValidationError') {

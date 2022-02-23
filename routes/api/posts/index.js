@@ -1,10 +1,10 @@
 const router = require('express').Router();
 const { PaginationParameters } = require('mongoose-paginate-v2');
-const mongoose = require('mongoose');
 const { randomBytes } = require('crypto');
 const path = require('path');
 const multer = require('multer');
 const postRepository = require('../../../data/PostRepository');
+const userRepository = require('../../../data/UserRepository');
 const checkJwt = require('../../../utils/middleware/checkJwt');
 const { EntityNotFound } = require('../../../utils/errors');
 
@@ -42,10 +42,14 @@ const upload = multer({ storage });
  */
 router.post('/', checkJwt, upload.single('image'), async (req, res, next) => {
   try {
-    const i = req.body;
-    i.owner = mongoose.Types.ObjectId(i.owner);
-    i.image = `/assets/images/${req.file.filename}`;
-    await postRepository.insertOne(i);
+    const { body } = req;
+    const email = req.auth.payload['http://localhost//email'];
+    const user = await userRepository.findByEmail(email);
+    if (!user) throw EntityNotFound();
+    // eslint-disable-next-line dot-notation
+    body.owner = user['_id'];
+    body.image = `/assets/images/${req.file.filename}`;
+    await postRepository.insertOne(body);
     res.status(201).end();
   } catch (err) {
     next(err);
