@@ -52,22 +52,21 @@ router.post('/', checkJwt, upload.single('image'), async (req, res, next) => {
   }
 });
 
-// Continuer, Details d'un post: Méthode /api/p/{postId}
-
-/** @description Cette route permet d'obtenir un seul post avec son id /api/p/{postId}  */
-router.get('/:id', async (req, res) => {
+/**
+ * Cette route permet d'obtenir un seul post avec son id /api/p/{postId}
+ *
+ * @author My-Anh Chau
+ */
+router.get('/:id', async (req, res, next) => {
   try {
   // on get le id
     const { id } = req.params;
-    const post = await postRepository.getOne(id);
+    const post = await postRepository.findById(id);
     // si post existe pas ou a pas de nbr de string correspondant
     if (!post) throw EntityNotFound();
-    return res.status(200).json(post);
+    res.status(200).json(post);
   } catch (err) {
-    console.error(err);
-    return res
-      .status(400)
-      .json({ status: 400, message: 'Internal Server Error' });
+    next(err);
   }
 });
 

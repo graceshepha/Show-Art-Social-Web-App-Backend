@@ -2,7 +2,7 @@
 const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
-const { UnknownError, DuplicatedUniqueError, EntityNotFound } = require('../utils/errors');
+const { UnknownError, DuplicatedUnique, EntityNotFound } = require('../utils/errors');
 /**
  * @typedef {import('../types/schemas.types').User} User
  */
@@ -146,7 +146,7 @@ class UserRepository {
         debug(err);
         const keys = Object.keys(err.keyValue);
         const arr = keys.map((k) => `${k} (${err.keyValue[k]})`);
-        throw DuplicatedUniqueError(`Users cannot share the same ${arr.join(', ')}`);
+        throw DuplicatedUnique(`Users cannot share the same ${arr.join(', ')}`);
       } else {
         // UNKNOWN ERROR
         debug(err);

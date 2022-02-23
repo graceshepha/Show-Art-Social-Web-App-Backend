@@ -2,7 +2,7 @@
 const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
-const { DuplicatedUniqueError, UnknownError } = require('../utils/errors');
+const { DuplicatedUnique, UnknownError, InvalidKey } = require('../utils/errors');
 const userRepository = require('./UserRepository');
 
 /** @type {import('mongoose').PaginateOptions} */
@@ -20,11 +20,17 @@ class PostRepository {
     this.#model = client.getPostModel();
   }
 
+<<<<<<< HEAD
   /*
   *
   * @author My-Anh Chau
   *
   */
+=======
+  /**
+   * @author Bly Grâce Schephatia
+   */
+>>>>>>> bb7e29200a3fbeb1e239d8283b5c16901f6ca0be
   async insertOne(info) {
     const post = new this.#model(info);
     // VALIDATE
@@ -42,7 +48,7 @@ class PostRepository {
         debug(err);
         const keys = Object.keys(err.keyValue);
         const arr = keys.map((k) => `${k} (${err.keyValue[k]})`);
-        throw DuplicatedUniqueError(`Posts cannot share the same ${arr.join(', ')}`);
+        throw DuplicatedUnique(`Posts cannot share the same ${arr.join(', ')}`);
       } else {
         // UNKNOWN ERROR
         debug(err);
@@ -51,6 +57,7 @@ class PostRepository {
     }
   }
 
+<<<<<<< HEAD
   // PostRepo: addLike(userid) / removeLike(userid)
   // userid = celui qui a like
 
@@ -83,20 +90,28 @@ class PostRepository {
 
   // mettre dans post les informations de un post specifique avec le id
   async getOne(id) {
+=======
+  /**
+   * @author My-Anh Chau
+   */
+  async findById(id) {
+    // mettre dans post les informations de un post specifique avec le id
+>>>>>>> bb7e29200a3fbeb1e239d8283b5c16901f6ca0be
     // faire un trycatch avec un string qui doit etre sup a 24
     // catch les erreurs possibles
     try {
-    // prendre obj selon le id
-      const post = await this.#model.findById(id).exec();
-      return post;
+      return await this.#model.findById(id).exec();
     } catch (err) {
       debug(err);
-      throw UnknownError();
+      throw InvalidKey(err.message);
       // raison qui peut avoir une erreur
       // que sa soit pas assez de string
     }
   }
 
+  /**
+   * @author Bly Grâce Schephatia
+   */
   async getAll({ offset, page = 1 }) {
     const o = { ...options };
     if (!offset) o.page = page;

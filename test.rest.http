@@ -3,54 +3,9 @@ GET http://localhost:8080/api/u/
 
 ###
 
-GET http://localhost:8080/api/u/
-    ?offset=2
-
-###
-
 GET http://localhost:8080/api/p/
     ?page=1
-
-### 
-
-POST http://localhost:8080/api/u/add
-Content-Type: application/json
-
-{
-    "username": "testing_username",
-    "email": "testing@mail.com"
-}
-
-###
-
-POST http://localhost:8080/api/u/add
-Content-Type: application/json
-
-{
-    "username": "testing_username2",
-    "email": "testing2@mail.com",
-    "details": {
-        "socials": {
-            "facebook": "facebook.com"
-        }
-    }
-}
-
-###
-
-POST http://localhost:8080/api/p/add
-Content-Type: application/json
-
-{
-    "title": "title4",
-    "owner": "620c54f2faba3f1182ce176f",
-    "image": "imagepath"
-}
-
-
 
 ###
 
 GET http://localhost:8080/api/p/62142e9552769e357f790944
-
-
