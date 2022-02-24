@@ -112,7 +112,9 @@ class PostRepository {
     // faire un trycatch avec un string qui doit etre sup a 24
     // catch les erreurs possibles
     try {
-      return await this.#model.findById(id).exec();
+      const post = this.#model.findById(id);
+      post.populate({ path: 'owner' });
+      return await post.exec();
     } catch (err) {
       debug(err);
       throw InvalidKey(err.message);
