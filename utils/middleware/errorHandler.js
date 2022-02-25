@@ -13,6 +13,7 @@ module.exports = (err, req, res, next) => {
         .send(err.error);
       break;
     default:
-      res.status(500).send(err);
+      res.status(500)
+        .send(err);
   }
 };
