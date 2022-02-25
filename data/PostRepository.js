@@ -2,7 +2,9 @@
 const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
-const { DuplicatedUnique, UnknownError, InvalidKey } = require('../utils/errors');
+const {
+  DuplicatedUnique, UnknownError, InvalidKey, EntityNotFound,
+} = require('../utils/errors');
 const userRepository = require('./UserRepository');
 
 /** @type {import('mongoose').PaginateOptions} */
@@ -56,15 +58,26 @@ class PostRepository {
   /**
    * @author My-Anh Chau
    */
-  async addLike(userid) {
+  async addLike(userid, postid) {
     try {
-      // Inserer un like
-      const post = await this.#model.findById(userid).exec();
+      // AVEC LE POST REPOSITORY
+      //
+      // postid de la photo qui est like
+      // userId de l'utilisateur qui a like la photo
+      //
+      // retourne lobj du user qui a like
+
+      // retourne lobjet du post qui a ete like
+      const post = await this.#model.findById(postid);
+      if (!post) throw EntityNotFound();
+      // const user = await userRepository.findUserById(userid);
       // insert user to the like array qui sapelle likedPosts
-      userRepository.addLikedPost(post);
-      // fo ajouter lutilisateur qui a le like et celui qui like
-      this.#model.likes.push(new mongoose.Types.ObjectId(userid));
-      this.#model.save();
+      // inserer le userId dans le array de post qui a ete like
+      //
+      // inserer le userId dans le array likes
+      post.meta.likes.push(new mongoose.Types.ObjectId(userid));
+      await userRepository.addLikedPost(userid, postid);
+      await post.save();
     } catch (err) {
       throw UnknownError();
     }
@@ -73,14 +86,19 @@ class PostRepository {
   /**
    * @author My-Anh Chau
    */
-  async removeLike(userid) {
+  async removeLike(userid, postid) {
     try {
       // prendre obj du post de lutilisateur
-      const post = await this.#model.findById(userid).exec();
+      const post = await this.#model.findUserById(postid);
+      const user = await userRepository.findUserById(userid);
       // remove user to the like array qui sapelle likedPosts
-      this.#model.likes.splice(new mongoose.Types.ObjectId(userid));
-      this.#model.save();
-      userRepository.removeLikedPost(post);
+      // this.#model.likes.splice(new mongoose.Types.ObjectId(userid));
+
+      post.meta.likes.findByIdDel(new mongoose.Types.ObjectId(userid));
+      user.removeLikedPost(userid, postid);
+      post.save();
+      user.save();
+      return await user.save();
     } catch (err) {
       throw UnknownError();
     }
@@ -89,6 +107,8 @@ class PostRepository {
   /**
    * @author My-Anh Chau
    */
+
+  // mettre dans post les informations de un post specifique avec le id
   async getOne(id) {
     // faire un trycatch avec un string qui doit etre sup a 24
     // catch les erreurs possibles
@@ -122,6 +142,21 @@ class PostRepository {
   }
 
   /**
+   * @author My-Anh Chau
+   */
+  async findByIdDel(id) {
+    try {
+      // whats the difference between findByIdAndDelete or findByIdAndRemove
+      return await this.#model.findByIdAndDelete(id).exec();
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+      // raison qui peut avoir une erreur
+      // que sa soit pas assez de string
+    }
+  }
+
+  /**
    * @author Bly Grâce Schephatia
    */
   async getAll({ offset, page = 1 }) {
@@ -138,5 +173,4 @@ class PostRepository {
     }
   }
 }
-
 module.exports = new PostRepository();

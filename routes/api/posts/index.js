@@ -7,6 +7,8 @@ const multer = require('multer');
 const postRepository = require('../../../data/PostRepository');
 const checkJwt = require('../../../utils/middleware/checkJwt');
 const { EntityNotFound } = require('../../../utils/errors');
+const { addLike } = require('../../../data/PostRepository');
+const PostRepository = require('../../../data/PostRepository');
 
 /**
  * Cette route retourne tous les posts avec pagination
@@ -65,6 +67,41 @@ router.get('/:id', async (req, res, next) => {
     // si post existe pas ou a pas de nbr de string correspondant
     if (!post) throw EntityNotFound();
     res.status(200).json(post);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ajouter la route pr addLike
+router.get('/:idUser/:idPost', async (req, res, next) => {
+  try {
+  // on get le id
+    const { idUser } = req.params;
+    const { idPost } = req.params;
+    const user = await postRepository.findById(idUser);
+    // const post = await postRepository.findById(idPost);
+    await postRepository.addLike(idUser, idPost);
+    // si post/user existe pas ou a pas de nbr de string correspondant
+    // if (!user || !post) throw EntityNotFound();
+    res.status(201).end();
+    // res.status('dfsdfsfd');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ajouter la route pr removelike
+router.delete('/:idUser/:idPost', async (req, res, next) => {
+  try {
+  // on get le id
+    const { idUser } = req.params;
+    const { idPost } = req.params;
+    const user = await postRepository.findById(idUser);
+    const post = await postRepository.findById(idPost);
+    await postRepository.removeLike(idUser, idPost);
+    // si post/user existe pas ou a pas de nbr de string correspondant
+    // if (!user || !post) throw EntityNotFound();
+    res.status(200).json(user);
   } catch (err) {
     next(err);
   }

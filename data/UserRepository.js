@@ -55,15 +55,30 @@ class UserRepository {
    * @author My-Anh Chau
    */
   // Insertion dun likes a un utilisateur
-  async addLikedPost(postid) {
+  // chaque utilisateur a un id
+  async addLikedPost(userid, postid) {
+    // userOwner doit avoir userliker ds sa liste de like
+    // userliker doit avoir userOwner ds sa liste de addlikedPost
+    //
+    // userid celui qui like
+    // postid post qui est like
+    //
+    if (!userid || !postid) throw new Error('Id cannot be null');
+    // veut recevoir le post a ajouter postid mais aussi recevoir = postid
+    // une facon dideentifier utilisateur qui a like = userid
     // objet d'un utilisateur qui a post
-    if (!postid) throw new Error('Id cannot be null');
-    // obj du user qui obtien un like
-    const user = await this.#model.findById(postid);
-    // apelle de la fonct bd pr ajouter
+    // get utilisateur qui a like
+    // get utilisateur qui se fait like
+    // const userOwner = await postRepository.findById(postid);
     try {
-      user.likedPosts.push(new mongoose.Types.ObjectId(postid));
-      user.save();
+      const userLiker = await this.#model.findById(userid).exec();
+      if (!userLiker) throw EntityNotFound();
+      // get userLiker a avoir ses like de user
+      // userOwner.meta.likes.push(new mongoose.Types.ObjectId(userid));
+      //  insert dans userLiker son likedpost
+      userLiker.likedPosts.push(new mongoose.Types.ObjectId(postid));
+      // userOwner.save();
+      await userLiker.save();
     } catch (err) {
       debug(err);
       throw UnknownError();
@@ -73,14 +88,15 @@ class UserRepository {
   /**
    * @author My-Anh Chau
    */
-  async removeLikedPost(postid) {
-    if (!postid) throw new Error('Id cannot be null');
+  async removeLikedPost(userid, postid) {
+    if (!userid || !postid) throw new Error('Id cannot be null');
     // objet d'un utilisateur qui a post
-    const user = await this.#model.findById(postid).exec();
+    const userLiker = await this.#model.findById(postid).exec();
     // apelle de la fonct bd pr ajouter
     try {
-      user.likedPosts.splice(new mongoose.Types.ObjectId(postid));
-      user.save();
+      // findbyidDelete or findbyidRemove
+      userLiker.likedPosts.findByIdAndDelete(new mongoose.Types.ObjectId(postid));
+      userLiker.save();
     } catch (err) {
       debug(err);
       throw UnknownError();
@@ -169,6 +185,15 @@ class UserRepository {
    */
   async findByUsername(username) {
     return this.#model.findOne({ username });
+  }
+
+  /**
+   * @param {string} userId Username de l'utilisateur
+   * @returns {Promise<mongoose.Document<User>>}
+   *
+   */
+  async findUserById(userId) {
+    return this.#model.findById({ userId });
   }
 }
 
