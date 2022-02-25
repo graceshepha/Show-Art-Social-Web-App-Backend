@@ -61,4 +61,5 @@ typings/
 .next
 
 # website assets
-public/
+public/images/**
+!public/images/.gitkeep
