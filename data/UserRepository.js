@@ -195,6 +195,11 @@ class UserRepository {
   async findUserById(userId) {
     return this.#model.findById({ userId });
   }
+
+  // find /user/:username/posts
+  // find /user/:username/likes
+  // find /user/:username/followers
+  // find /user/:username/following
 }
 
 /*

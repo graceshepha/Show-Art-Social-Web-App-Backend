@@ -9,3 +9,7 @@ GET http://localhost:8080/api/p/
 ###
 
 GET http://localhost:8080/api/p/621395bffbdde56add373289
+
+###
+GET http://localhost:8080/me
+Authorization: bearer 
