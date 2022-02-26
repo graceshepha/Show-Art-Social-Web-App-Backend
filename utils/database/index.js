@@ -1,4 +1,4 @@
 // @ts-check
-const DatabaseClient = require('./database');
+const DatabaseClient = require('./Database');
 
 module.exports = new DatabaseClient();

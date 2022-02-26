@@ -1,5 +1,4 @@
-/* eslint-disable no-underscore-dangle */
-const debug = require('debug')('backend:database');
+const debug = require('debug')('backend:postRepository');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
 const {
@@ -31,8 +30,8 @@ class PostRepository {
     // VALIDATE
     try {
       await this.#model.validate(post);
-      // MUST INSERT POST TO USER ARRAY !!
-      userRepository.insertPost(post.owner, post._id);
+      // eslint-disable-next-line dot-notation
+      userRepository.insertPost(post.owner, post['_id']); // MUST INSERT POST TO USER ARRAY !!
       return await post.save();
     } catch (err) {
       if (err.name === 'ValidationError') {
@@ -88,16 +87,29 @@ class PostRepository {
    */
   async removeLike(userid, postid) {
     try {
+    // userId = userLiker
+    // postId = postId du owner
       // prendre obj du post de lutilisateur
-      const post = await this.#model.findUserById(postid);
+      const post = await this.#model.findById(postid);
       const user = await userRepository.findUserById(userid);
+      if (!post || !user) throw EntityNotFound();
       // remove user to the like array qui sapelle likedPosts
       // this.#model.likes.splice(new mongoose.Types.ObjectId(userid));
-
-      post.meta.likes.findByIdDel(new mongoose.Types.ObjectId(userid));
-      user.removeLikedPost(userid, postid);
+      // Faire quelque chose de similaire
+      // post.meta.likes.findByIdDel(new mongoose.Types.ObjectId(userid));
+      // { $push: { <post.meta.likes>: <value1>, ... } }
+      // Remove object by id from an array in mongoose ( enlever le like du liker)
+      post.update(
+        { $pull: { 'post.meta.likes': new mongoose.Types.ObjectId(postid) } },
+      );
+      // la il faut trouver le userid tu userOwner
+      // const email = PostRepository.req.auth.payload['http:localhost//email'];
+      // userId = userLiker
+      // postId = postId du owner
+      debug(post.meta.likes);
+      debug(new mongoose.Types.ObjectId(postid));
+      userRepository.removeLikedPost(userid, postid);
       post.save();
-      user.save();
       return await user.save();
     } catch (err) {
       throw UnknownError();
@@ -178,7 +190,11 @@ class PostRepository {
    */
   async addComment(id, comment) {
     try {
-      const post = await this.#model.findByIdAndUpdate(id, { $push: { comments: comment } });
+      const post = await this.#model.findByIdAndUpdate(
+        id,
+        { $push: { comments: comment } },
+        { new: true },
+      );
       if (!post) throw EntityNotFound();
     } catch (err) {
       debug(err);

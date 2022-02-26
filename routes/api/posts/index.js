@@ -107,35 +107,48 @@ router.post('/:id/comment', checkJwt, async (req, res, next) => {
 });
 
 // ajouter la route pr addLike
-router.get('/:idUser/:idPost', async (req, res, next) => {
+router.get('/:idUser/:idPost', checkJwt, async (req, res, next) => {
   try {
   // on get le id
     const { idUser } = req.params;
     const { idPost } = req.params;
-    const user = await postRepository.findById(idUser);
     // const post = await postRepository.findById(idPost);
+    // idUser = userLiker
+    // idPost = idPost du owner
     await postRepository.addLike(idUser, idPost);
     // si post/user existe pas ou a pas de nbr de string correspondant
     // if (!user || !post) throw EntityNotFound();
     res.status(201).end();
-    // res.status('dfsdfsfd');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:idPost/favorite', checkJwt, async (req, res, next) => {
+  try {
+    const { idPost } = req.params;
+    // checkJwt
+    // await postRepository.addLike(idUser, idPost);
+    res.status(201).end();
   } catch (err) {
     next(err);
   }
 });
 
 // ajouter la route pr removelike
-router.delete('/:idUser/:idPost', async (req, res, next) => {
+router.delete('/:idUser/:idPost', checkJwt, async (req, res, next) => {
   try {
-  // on get le id
+  // on get le id dans les url params
     const { idUser } = req.params;
     const { idPost } = req.params;
-    const user = await postRepository.findById(idUser);
-    const post = await postRepository.findById(idPost);
+    // const user = await postRepository.findById(idUser);
+    // const post = await postRepository.findById(idPost);
+    // idUser = userLiker
+    // idPost = idPost du owner
     await postRepository.removeLike(idUser, idPost);
     // si post/user existe pas ou a pas de nbr de string correspondant
     // if (!user || !post) throw EntityNotFound();
-    res.status(200).json(user);
+    res.status(200).end();
   } catch (err) {
     next(err);
   }
