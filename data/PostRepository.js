@@ -5,14 +5,27 @@ const {
   DuplicatedUnique, UnknownError, InvalidKey, EntityNotFound,
 } = require('../utils/errors');
 const userRepository = require('./UserRepository');
+/**
+ * @typedef {import('../types/schemas.types').Post} Post
+ * @typedef {mongoose.HydratedDocument<Post>} PostDocument
+ * @typedef {mongoose.PaginateDocument<Post, {}>} PostPaginatedDocument
+ * @typedef {mongoose.PaginateResult<PostPaginatedDocument>} PostPaginatedResult
+ */
 
-/** @type {import('mongoose').PaginateOptions} */
+/**
+ * @ignore
+ * @type {mongoose.PaginateOptions}
+ */
 const options = {
   lean: true,
   limit: 10,
   sort: { date: -1 },
 };
 
+/**
+ * Dépot d'un post qui possède tous les fonctions CRUD
+ * d'un post dans l'application.
+ */
 class PostRepository {
   #model;
 
@@ -22,16 +35,19 @@ class PostRepository {
   }
 
   /**
+   * @param {Post} info Informations initiales du post a insérer
+   * @returns {Promise<PostDocument>}
+   *
    * @author My-Anh Chau
    * @author Bly Grâce Schephatia
    */
   async insertOne(info) {
+    /** @type {PostDocument} */
     const post = new this.#model(info);
     // VALIDATE
     try {
-      await this.#model.validate(post);
-      // eslint-disable-next-line dot-notation
-      userRepository.insertPost(post.owner, post['_id']); // MUST INSERT POST TO USER ARRAY !!
+      await post.validate();
+      userRepository.insertPost(post.owner, post._id); // MUST INSERT POST TO USER ARRAY !!
       return await post.save();
     } catch (err) {
       if (err.name === 'ValidationError') {
@@ -117,6 +133,9 @@ class PostRepository {
   }
 
   /**
+   * @param {string | mongoose.Types.ObjectId} id Id du post à chercher
+   * @returns {Promise<PostDocument>} Document du post
+   *
    * @author My-Anh Chau
    */
   async findPostById(id) {
@@ -136,6 +155,7 @@ class PostRepository {
   }
 
   /**
+   * @ignore
    * @author My-Anh Chau
    */
   async findByIdDel(id) {
@@ -151,15 +171,16 @@ class PostRepository {
   }
 
   /**
+   * @param {mongoose.PaginateOptions} options
+   * @returns {Promise<PostPaginatedResult>} Documents des posts paginés
+   *
    * @author Bly Grâce Schephatia
    */
   async getAll({ offset, page = 1 }) {
-    const o = {
-      ...options,
-      populate: { path: 'owner' },
-    };
+    const o = { ...options };
     if (!offset) o.page = page;
     else o.offset = offset;
+    o.populate = { path: 'owner' };
 
     try {
       return await this.#model.paginate({}, o);
@@ -170,11 +191,17 @@ class PostRepository {
   }
 
   /**
+   * Ajoute une view à un post
+   *
+   * @param {string} id Id du post
    * @author Roger Montero
    */
   async addView(id) {
     try {
-      const post = await this.#model.findByIdAndUpdate(id, { $inc: { 'meta.views': 1 } });
+      const post = await this.#model.findByIdAndUpdate(
+        id,
+        { $inc: { 'meta.views': 1 } },
+      );
       if (!post) throw EntityNotFound();
     } catch (err) {
       debug(err);
@@ -184,11 +211,16 @@ class PostRepository {
   }
 
   /**
+   * Ajoute un commentaire à un post
+   *
    * @param {string} id Id du post
    * @param {{user: string, comment: string}} comment Commentaire a insérer
+   * @returns {Promise<PostDocument>} Document du post commentée
+   *
    * @author Roger Montero
    */
   async addComment(id, comment) {
+    if (!comment && !comment.id && !comment.user) throw InvalidKey();
     try {
       const post = await this.#model.findByIdAndUpdate(
         id,
@@ -196,6 +228,7 @@ class PostRepository {
         { new: true },
       );
       if (!post) throw EntityNotFound();
+      return post;
     } catch (err) {
       debug(err);
       if (err.name === 'CustomError') throw err;

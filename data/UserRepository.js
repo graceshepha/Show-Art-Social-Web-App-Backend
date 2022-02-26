@@ -7,6 +7,9 @@ const {
 } = require('../utils/errors');
 /**
  * @typedef {import('../types/schemas.types').User} User
+ * @typedef {mongoose.HydratedDocument<User>} UserDocument
+ * @typedef {mongoose.PaginateDocument<User, {}>} UserPaginatedDocument
+ * @typedef {mongoose.PaginateResult<UserPaginatedDocument>} UserPaginatedResult
  */
 
 /**
@@ -25,7 +28,7 @@ const options = {
 const withRandom = (str) => `${str}-${Math.floor(100000 + Math.random() * 900000)}`;
 
 /**
- * Dépot d'un utilisateur qui possède tous les fonctions pour CRUD
+ * Dépot d'un utilisateur qui possède tous les fonctions CRUD
  * d'un utilisateur dans l'application.
  *
  * @author Roger Montero
@@ -42,18 +45,21 @@ class UserRepository {
    * Trouver tous les documents de la collection
    *
    * @param {mongoose.PaginateOptions} options Options de la pagination
-   * @returns {Promise<Object>} Liste de tous les utilisateurs
+   * @returns {Promise<UserPaginatedResult>} Liste de tous les utilisateurs
+   *
+   * @author Roger Montero
    */
   async getAll({ offset, page = 1 }) {
     const o = {
       ...options,
-      path: 'posts',
     };
     if (!offset) o.page = page;
     else o.offset = offset;
+    o.populate = { path: 'posts' }
 
     try {
-      return await this.#model.paginate({}, o);
+      const u = await this.#model.paginate({}, o);
+      return u;
     } catch (err) {
       debug(err);
       throw UnknownError(err.message);
@@ -119,11 +125,13 @@ class UserRepository {
   }
 
   /**
-   * Insertion d'un post à un utilisateur
+   * Insertion d'un post au document d'un utilisateur
    *
    * @param {string | mongoose.Types.ObjectId} userid Id d'un utilisateur
    * @param {string | mongoose.Types.ObjectId} postid Id du post à ajouter
    * @throws {ValidationError|CustomError}
+   * @author Roger Montero
+   *
    * @author Roger Montero
    */
   async insertPost(userid, postid) {
@@ -134,20 +142,28 @@ class UserRepository {
         userid,
         { $push: { posts: new mongoose.Types.ObjectId(postid) } },
         { new: true },
-      );
+      ).exec();
       if (!user) throw EntityNotFound();
     } catch (err) {
       debug(err);
-      throw UnknownError();
+      throw InvalidKey();
     }
   }
 
   /**
-   * Insertion d'un utilisateur à la collection
+   * Insertion conditionnelle d'un utilisateur à la collection, change le username
+   * passé dans l'objet s'il existe déjà un utilisateur avec ce username.
+   *
+   * Il est important à savoir: si un utilisateur existe déjà avec le courriel passé,
+   * cette méthode n'essaie pas d'insérer son courriel ni son username.
+   *
+   * Cette méthode est utilisé pour la requête suite à la connexion d'un utilisateur.
    *
    * @param {User} info Details d'un utilisateur
-   * @returns {Promise<mongoose.Document<User>>} Utilisateur créé
+   * @returns {Promise<UserDocument>} Utilisateur créé ou modifié
    * @throws {ValidationError|CustomError}
+   *
+   * @author Roger Montero
    */
   async initialUpsertOne(info) {
     const userDetails = { ...info };
@@ -157,7 +173,7 @@ class UserRepository {
       // new user
       const test = await this.findByUsername(info.username);
       if (test) {
-        // username already taken, so create a new temp username
+        // username already taken, so create another username
         return this.initialUpsertOne({
           ...info,
           username: withRandom(info.username),
@@ -168,9 +184,10 @@ class UserRepository {
 
     user.set(userDetails);
     try {
-      await this.#model.validate(user);
+      await user.validate();
       return await user.save();
     } catch (err) {
+      // verify type of error
       if (err.name === 'ValidationError') {
         debug(err);
         throw err;
@@ -189,13 +206,20 @@ class UserRepository {
   }
 
   /**
+   * Trouve un utilisateur avec son courriel.
+   *
    * @param {string} email Courriel de l'utilisateur
-   * @returns {Promise<mongoose.Document<User> | null>}
+   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé ou `null`.
+   * @throws {CustomError}
+   *
+   * @author Roger Montero
    */
   async findByEmail(email) {
+    if (!email) throw InvalidKey('Email was not received');
     try {
-      const user = this.#model.findOne({ email }).exec();
-      return user;
+      return await this.#model
+        .findOne({ email })
+        .exec();
     } catch (err) {
       debug(err);
       throw InvalidKey(err.message);
@@ -203,13 +227,19 @@ class UserRepository {
   }
 
   /**
+   * Trouve un utilisateur avec son username.
+   *
    * @param {string} username Username de l'utilisateur
-   * @returns {Promise<mongoose.Document<User> | null>}
+   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé ou `null`.
+   * @throws {CustomError}
+   *
+   * @author Roger Montero
    */
   async findByUsername(username) {
     try {
-      const user = this.#model.findOne({ username }).exec();
-      return user;
+      return await this.#model
+        .findOne({ username })
+        .exec();
     } catch (err) {
       debug(err);
       throw InvalidKey(err.message);
@@ -217,14 +247,19 @@ class UserRepository {
   }
 
   /**
+   * Trouve un utilisateur avec son id.
+   *
    * @param {string | mongoose.Types.ObjectId} userId Id de l'utilisateur
-   * @returns {Promise<mongoose.Document<User> | null>} Utilisateur
+   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé ou `null`.
+   * @throws {CustomError}
+   *
    * @author My-Anh Chau
    */
   async findUserById(userId) {
     try {
-      const user = this.#model.findById(userId).exec();
-      return user;
+      return this.#model
+        .findById(userId)
+        .exec();
     } catch (err) {
       debug(err);
       throw InvalidKey(err.message);
@@ -236,19 +271,5 @@ class UserRepository {
   // find /user/:username/followers
   // find /user/:username/following
 }
-
-/*
-  how to get errors and values of ValidationError
-
-  const errors = Object.keys(err.errors);
-  errors.map((e) => {
-    const error = err.errors[e];
-    return {
-      type: error.kind,
-      path: error.path,
-      message: error.message,
-    };
-  });
-*/
 
 module.exports = new UserRepository();

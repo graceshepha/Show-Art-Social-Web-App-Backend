@@ -10,7 +10,6 @@ const { EntityNotFound } = require('../../../utils/errors');
 
 /**
  * Cette route retourne tous les posts avec pagination
- *
  * @author Bly, Grâce Schephatia
  */
 router.get('/', async (req, res, next) => {
@@ -24,6 +23,10 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+/**
+ * Le storage pour `multer`.
+ * @type {multer.StorageEngine}
+ */
 const storage = multer.diskStorage({
   destination(_req, _file, cb) {
     cb(null, 'public/images');
@@ -33,11 +36,13 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
+/**
+ * Middleware pour obtenir et sauvegarder les images reçus à des routes.
+ */
 const upload = multer({ storage });
 
 /**
  * Cette route ajoute un post
- *
  * @author Bly Grâce Schephatia
  */
 router.post('/', checkJwt, upload.single('image'), async (req, res, next) => {
@@ -47,7 +52,7 @@ router.post('/', checkJwt, upload.single('image'), async (req, res, next) => {
     const user = await userRepository.findByEmail(email);
     if (!user) throw EntityNotFound();
     // eslint-disable-next-line dot-notation
-    body.owner = user['_id'];
+    body.owner = user._id;
     body.image = `/assets/images/${req.file.filename}`;
     await postRepository.insertOne(body);
     res.status(201).end();
@@ -58,14 +63,13 @@ router.post('/', checkJwt, upload.single('image'), async (req, res, next) => {
 
 /**
  * Cette route permet d'obtenir un seul post avec son id /api/p/{postId}
- *
  * @author My-Anh Chau
  */
 router.get('/:id', async (req, res, next) => {
   try {
   // on get le id
     const { id } = req.params;
-    const post = await postRepository.findById(id);
+    const post = await postRepository.findPostById(id);
     if (!post) throw EntityNotFound();
     res.status(200).json(post.toJSON({ virtuals: true }));
   } catch (err) {
@@ -74,19 +78,23 @@ router.get('/:id', async (req, res, next) => {
 });
 
 /**
+ * Route `POST /api/p/:id/view` qui ajoute un view à un post.
  * @author Roger Montero
  */
 router.post('/:id/view', async (req, res, next) => {
   const { id } = req.params;
   try {
     await postRepository.addView(id);
-    res.status(201).end();
+    res.status(201)
+      .end();
   } catch (err) {
     next(err);
   }
 });
 
 /**
+ * Route `POST /api/p/:id/comment` pour ajouter un commentaire qui retourne une réponse 200
+ * avec le array des comments du post.
  * @author Roger Montero
  */
 router.post('/:id/comment', checkJwt, async (req, res, next) => {
@@ -94,13 +102,13 @@ router.post('/:id/comment', checkJwt, async (req, res, next) => {
   const { comment } = req.body;
   try {
     const user = await userRepository.findByEmail(req.auth.payload['http://localhost//email']);
-    if (!user) throw EntityNotFound();
-    await postRepository.addComment(id, {
-      // eslint-disable-next-line dot-notation
-      user: user['_id'],
+    if (!user) throw EntityNotFound(); // shouldn't be the case
+    const post = await postRepository.addComment(id, {
+      user: user._id,
       comment,
     });
-    res.status(201).end();
+    res.status(200)
+      .json(post.comments.toJSON());
   } catch (err) {
     next(err);
   }
