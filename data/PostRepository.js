@@ -10,7 +10,7 @@ const userRepository = require('./UserRepository');
 /** @type {import('mongoose').PaginateOptions} */
 const options = {
   lean: true,
-  limit: 1,
+  limit: 10,
   sort: { date: -1 },
 };
 
@@ -33,7 +33,6 @@ class PostRepository {
       await this.#model.validate(post);
       // MUST INSERT POST TO USER ARRAY !!
       userRepository.insertPost(post.owner, post._id);
-      console.log(post.owner);
       return await post.save();
     } catch (err) {
       if (err.name === 'ValidationError') {
@@ -108,34 +107,14 @@ class PostRepository {
   /**
    * @author My-Anh Chau
    */
-
-  // mettre dans post les informations de un post specifique avec le id
-  async getOne(id) {
-    // faire un trycatch avec un string qui doit etre sup a 24
-    // catch les erreurs possibles
-    try {
-    // prendre obj selon le id
-      const post = await this.#model.findById(id).exec();
-      return post;
-    } catch (err) {
-      debug(err);
-      throw UnknownError();
-      // raison qui peut avoir une erreur
-      // que sa soit pas assez de string
-    }
-  }
-
-  /**
-   * @author My-Anh Chau
-   */
-  async findById(id) {
+  async findPostById(id) {
     // mettre dans post les informations de un post specifique avec le id
     // faire un trycatch avec un string qui doit etre sup a 24
     // catch les erreurs possibles
     try {
-      const post = this.#model.findById(id);
-      post.populate({ path: 'owner' });
-      return await post.exec();
+      return await this.#model.findById(id)
+        .populate({ path: 'owner' })
+        .exec();
     } catch (err) {
       debug(err);
       throw InvalidKey(err.message);
@@ -163,16 +142,48 @@ class PostRepository {
    * @author Bly Grâce Schephatia
    */
   async getAll({ offset, page = 1 }) {
-    const o = { ...options };
+    const o = {
+      ...options,
+      populate: { path: 'owner' },
+    };
     if (!offset) o.page = page;
     else o.offset = offset;
-    o.populate = { path: 'owner' };
 
     try {
       return await this.#model.paginate({}, o);
     } catch (err) {
       debug(err);
       throw UnknownError();
+    }
+  }
+
+  /**
+   * @author Roger Montero
+   */
+  async addView(id) {
+    try {
+      const post = await this.#model.findByIdAndUpdate(id, { $inc: { 'meta.views': 1 } });
+      if (!post) throw EntityNotFound();
+    } catch (err) {
+      debug(err);
+      if (err.name === 'CustomError') throw err;
+      throw InvalidKey();
+    }
+  }
+
+  /**
+   * @param {string} id Id du post
+   * @param {{user: string, comment: string}} comment Commentaire a insérer
+   * @author Roger Montero
+   */
+  async addComment(id, comment) {
+    try {
+      const post = await this.#model.findByIdAndUpdate(id, { $push: { comments: comment } });
+      if (!post) throw EntityNotFound();
+    } catch (err) {
+      debug(err);
+      if (err.name === 'CustomError') throw err;
+      throw InvalidKey();
     }
   }
 }

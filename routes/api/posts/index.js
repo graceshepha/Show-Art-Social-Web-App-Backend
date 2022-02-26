@@ -7,8 +7,6 @@ const postRepository = require('../../../data/PostRepository');
 const userRepository = require('../../../data/UserRepository');
 const checkJwt = require('../../../utils/middleware/checkJwt');
 const { EntityNotFound } = require('../../../utils/errors');
-const { addLike } = require('../../../data/PostRepository');
-const PostRepository = require('../../../data/PostRepository');
 
 /**
  * Cette route retourne tous les posts avec pagination
@@ -68,9 +66,41 @@ router.get('/:id', async (req, res, next) => {
   // on get le id
     const { id } = req.params;
     const post = await postRepository.findById(id);
-    // si post existe pas ou a pas de nbr de string correspondant
     if (!post) throw EntityNotFound();
-    res.status(200).json(post);
+    res.status(200).json(post.toJSON({ virtuals: true }));
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * @author Roger Montero
+ */
+router.post('/:id/view', async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    await postRepository.addView(id);
+    res.status(201).end();
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * @author Roger Montero
+ */
+router.post('/:id/comment', checkJwt, async (req, res, next) => {
+  const { id } = req.params;
+  const { comment } = req.body;
+  try {
+    const user = await userRepository.findByEmail(req.auth.payload['http://localhost//email']);
+    if (!user) throw EntityNotFound();
+    await postRepository.addComment(id, {
+      // eslint-disable-next-line dot-notation
+      user: user['_id'],
+      comment,
+    });
+    res.status(201).end();
   } catch (err) {
     next(err);
   }

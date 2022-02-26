@@ -58,7 +58,7 @@ const errCodes = {
 };
 
 /**
- * Classe personalisée pour certains erreurs de notre base de donnée.
+ * Classe personalisée pour certains erreurs de notre application.
  *
  * @extends Error
  * @author Roger Montero

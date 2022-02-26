@@ -2,18 +2,26 @@
 const debug = require('debug')('backend:database');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
-const { UnknownError, DuplicatedUnique, EntityNotFound } = require('../utils/errors');
+const {
+  UnknownError, DuplicatedUnique, EntityNotFound, InvalidKey,
+} = require('../utils/errors');
 /**
  * @typedef {import('../types/schemas.types').User} User
  */
 
-/** @type {mongoose.PaginateOptions} */
+/**
+ * @ignore
+ * @type {mongoose.PaginateOptions}
+ */
 const options = {
   lean: true,
   limit: 5,
 };
 
-/** @param {string} str */
+/**
+ * @ignore
+ * @param {string} str
+ */
 const withRandom = (str) => `${str}-${Math.floor(100000 + Math.random() * 900000)}`;
 
 /**
@@ -37,10 +45,12 @@ class UserRepository {
    * @returns {Promise<Object>} Liste de tous les utilisateurs
    */
   async getAll({ offset, page = 1 }) {
-    const o = { ...options };
+    const o = {
+      ...options,
+      path: 'posts',
+    };
     if (!offset) o.page = page;
     else o.offset = offset;
-    o.populate = { path: 'posts' };
 
     try {
       return await this.#model.paginate({}, o);
@@ -114,11 +124,13 @@ class UserRepository {
   async insertPost(userid, postid) {
     if (!userid || !postid) throw new Error('Id cannot be null');
 
-    const user = await this.#model.findById(userid);
-    if (!user) throw EntityNotFound();
     try {
-      user.posts.push(new mongoose.Types.ObjectId(postid));
-      user.save();
+      const user = await this.#model.findByIdAndUpdate(
+        userid,
+        { $push: { posts: new mongoose.Types.ObjectId(postid) } },
+        { new: true },
+      );
+      if (!user) throw EntityNotFound();
     } catch (err) {
       debug(err);
       throw UnknownError();
@@ -173,27 +185,45 @@ class UserRepository {
 
   /**
    * @param {string} email Courriel de l'utilisateur
-   * @returns {Promise<mongoose.Document<User>>}
+   * @returns {Promise<mongoose.Document<User> | null>}
    */
   async findByEmail(email) {
-    return this.#model.findOne({ email });
+    try {
+      const user = this.#model.findOne({ email }).exec();
+      return user;
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+    }
   }
 
   /**
    * @param {string} username Username de l'utilisateur
-   * @returns {Promise<mongoose.Document<User>>}
+   * @returns {Promise<mongoose.Document<User> | null>}
    */
   async findByUsername(username) {
-    return this.#model.findOne({ username });
+    try {
+      const user = this.#model.findOne({ username }).exec();
+      return user;
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+    }
   }
 
   /**
-   * @param {string} userId Username de l'utilisateur
-   * @returns {Promise<mongoose.Document<User>>}
-   *
+   * @param {string | mongoose.Types.ObjectId} userId Id de l'utilisateur
+   * @returns {Promise<mongoose.Document<User> | null>} Utilisateur
+   * @author My-Anh Chau
    */
   async findUserById(userId) {
-    return this.#model.findById({ userId });
+    try {
+      const user = this.#model.findById(userId).exec();
+      return user;
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+    }
   }
 
   // find /user/:username/posts
