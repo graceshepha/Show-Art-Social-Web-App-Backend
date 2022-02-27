@@ -1,19 +1,31 @@
-/* eslint-disable no-underscore-dangle */
-const debug = require('debug')('backend:database');
+const debug = require('debug')('backend:postRepository');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
 const {
   DuplicatedUnique, UnknownError, InvalidKey, EntityNotFound,
 } = require('../utils/errors');
 const userRepository = require('./UserRepository');
+/**
+ * @typedef {import('../types/schemas.types').Post} Post
+ * @typedef {mongoose.HydratedDocument<Post>} PostDocument
+ * @typedef {mongoose.PaginateDocument<Post, {}>} PostPaginatedDocument
+ * @typedef {mongoose.PaginateResult<PostPaginatedDocument>} PostPaginatedResult
+ */
 
-/** @type {import('mongoose').PaginateOptions} */
+/**
+ * @ignore
+ * @type {mongoose.PaginateOptions}
+ */
 const options = {
   lean: true,
-  limit: 1,
+  limit: 10,
   sort: { date: -1 },
 };
 
+/**
+ * Dépot d'un post qui possède tous les fonctions CRUD
+ * d'un post dans l'application.
+ */
 class PostRepository {
   #model;
 
@@ -23,17 +35,19 @@ class PostRepository {
   }
 
   /**
+   * @param {Post} info Informations initiales du post a insérer
+   * @returns {Promise<PostDocument>}
+   *
    * @author My-Anh Chau
    * @author Bly Grâce Schephatia
    */
   async insertOne(info) {
+    /** @type {PostDocument} */
     const post = new this.#model(info);
     // VALIDATE
     try {
-      await this.#model.validate(post);
-      // MUST INSERT POST TO USER ARRAY !!
-      userRepository.insertPost(post.owner, post._id);
-      console.log(post.owner);
+      await post.validate();
+      userRepository.insertPost(post.owner, post._id); // MUST INSERT POST TO USER ARRAY !!
       return await post.save();
     } catch (err) {
       if (err.name === 'ValidationError') {
@@ -89,16 +103,29 @@ class PostRepository {
    */
   async removeLike(userid, postid) {
     try {
+    // userId = userLiker
+    // postId = postId du owner
       // prendre obj du post de lutilisateur
-      const post = await this.#model.findUserById(postid);
+      const post = await this.#model.findById(postid);
       const user = await userRepository.findUserById(userid);
+      if (!post || !user) throw EntityNotFound();
       // remove user to the like array qui sapelle likedPosts
       // this.#model.likes.splice(new mongoose.Types.ObjectId(userid));
-
-      post.meta.likes.findByIdDel(new mongoose.Types.ObjectId(userid));
-      user.removeLikedPost(userid, postid);
+      // Faire quelque chose de similaire
+      // post.meta.likes.findByIdDel(new mongoose.Types.ObjectId(userid));
+      // { $push: { <post.meta.likes>: <value1>, ... } }
+      // Remove object by id from an array in mongoose ( enlever le like du liker)
+      post.update(
+        { $pull: { 'post.meta.likes': new mongoose.Types.ObjectId(postid) } },
+      );
+      // la il faut trouver le userid tu userOwner
+      // const email = PostRepository.req.auth.payload['http:localhost//email'];
+      // userId = userLiker
+      // postId = postId du owner
+      debug(post.meta.likes);
+      debug(new mongoose.Types.ObjectId(postid));
+      userRepository.removeLikedPost(userid, postid);
       post.save();
-      user.save();
       return await user.save();
     } catch (err) {
       throw UnknownError();
@@ -106,36 +133,19 @@ class PostRepository {
   }
 
   /**
+   * @param {string | mongoose.Types.ObjectId} id Id du post à chercher
+   * @returns {Promise<PostDocument>} Document du post
+   *
    * @author My-Anh Chau
    */
-
-  // mettre dans post les informations de un post specifique avec le id
-  async getOne(id) {
-    // faire un trycatch avec un string qui doit etre sup a 24
-    // catch les erreurs possibles
-    try {
-    // prendre obj selon le id
-      const post = await this.#model.findById(id).exec();
-      return post;
-    } catch (err) {
-      debug(err);
-      throw UnknownError();
-      // raison qui peut avoir une erreur
-      // que sa soit pas assez de string
-    }
-  }
-
-  /**
-   * @author My-Anh Chau
-   */
-  async findById(id) {
+  async findPostById(id) {
     // mettre dans post les informations de un post specifique avec le id
     // faire un trycatch avec un string qui doit etre sup a 24
     // catch les erreurs possibles
     try {
-      const post = this.#model.findById(id);
-      post.populate({ path: 'owner' });
-      return await post.exec();
+      return await this.#model.findById(id)
+        .populate({ path: 'owner' })
+        .exec();
     } catch (err) {
       debug(err);
       throw InvalidKey(err.message);
@@ -145,6 +155,7 @@ class PostRepository {
   }
 
   /**
+   * @ignore
    * @author My-Anh Chau
    */
   async findByIdDel(id) {
@@ -160,6 +171,9 @@ class PostRepository {
   }
 
   /**
+   * @param {mongoose.PaginateOptions} options
+   * @returns {Promise<PostPaginatedResult>} Documents des posts paginés
+   *
    * @author Bly Grâce Schephatia
    */
   async getAll({ offset, page = 1 }) {
@@ -173,6 +187,52 @@ class PostRepository {
     } catch (err) {
       debug(err);
       throw UnknownError();
+    }
+  }
+
+  /**
+   * Ajoute une view à un post
+   *
+   * @param {string} id Id du post
+   * @author Roger Montero
+   */
+  async addView(id) {
+    try {
+      const post = await this.#model.findByIdAndUpdate(
+        id,
+        { $inc: { 'meta.views': 1 } },
+      );
+      if (!post) throw EntityNotFound();
+    } catch (err) {
+      debug(err);
+      if (err.name === 'CustomError') throw err;
+      throw InvalidKey();
+    }
+  }
+
+  /**
+   * Ajoute un commentaire à un post
+   *
+   * @param {string} id Id du post
+   * @param {{user: string, comment: string}} comment Commentaire a insérer
+   * @returns {Promise<PostDocument>} Document du post commentée
+   *
+   * @author Roger Montero
+   */
+  async addComment(id, comment) {
+    if (!comment && !comment.id && !comment.user) throw InvalidKey();
+    try {
+      const post = await this.#model.findByIdAndUpdate(
+        id,
+        { $push: { comments: comment } },
+        { new: true },
+      );
+      if (!post) throw EntityNotFound();
+      return post;
+    } catch (err) {
+      debug(err);
+      if (err.name === 'CustomError') throw err;
+      throw InvalidKey();
     }
   }
 }

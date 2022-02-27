@@ -5,11 +5,7 @@ const { NotConnected } = require('../errors');
 const schemas = require('./data.schemas');
 /**
  * @typedef {import('../../types/schemas.types').User} User
- */
-/**
  * @typedef {import('../../types/schemas.types').Post} Post
- */
-/**
  * @typedef {import('../../types/schemas.types').Tag} Tag
  */
 
@@ -80,18 +76,17 @@ class DatabaseClient {
 
   /**
    * Returns model of a User
-   * @returns {mongoose.PaginateModel<User>} User model
+   * @returns {schemas.UserModel} User model
    * @throws {DatabaseError}
    */
   getUserModel() {
     if (!this.isConnected) throw NotConnected();
-    // @ts-ignore
     return this.#client.model('User', schemas.userSchema);
   }
 
   /**
    * Returns model of a Post
-   * @returns {mongoose.PaginateModel<Post>} Post model
+   * @returns {schemas.PostModel} Post model
    * @throws {DatabaseError}
    */
   getPostModel() {
@@ -102,7 +97,7 @@ class DatabaseClient {
 
   /**
    * Returns model of a Tag
-   * @returns {mongoose.PaginateModel<Tag>} Tag model
+   * @returns {schemas.TagModel} Tag model
    * @throws {DatabaseError}
    */
   getTagModel() {

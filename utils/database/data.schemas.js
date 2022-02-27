@@ -1,12 +1,22 @@
 // @ts-check
-const { Schema } = require('mongoose');
+const mongoose = require('mongoose');
 const paginate = require('mongoose-paginate-v2');
 // const uniqueValidator = require('mongoose-unique-validator');
+/**
+ * @typedef {import('../../types/schemas.types').User} User
+ * @typedef {import('../../types/schemas.types').Post} Post
+ * @typedef {import('../../types/schemas.types').Tag} Tag
+ * @typedef {mongoose.PaginateModel<User, mongoose.Model<User>>} UserModel
+ * @typedef {mongoose.PaginateModel<Post, mongoose.Model<Post>>} PostModel
+ * @typedef {mongoose.PaginateModel<Tag, mongoose.Model<Tag>>} TagModel
+ */
+
+const { Schema } = mongoose;
 
 /**
  * Schéma de la collection `users`.
  *
- * @type {Schema<import('../../types/schemas.types').User>}
+ * @type {mongoose.Schema<User, UserModel>}
  * @author Roger Montero
  */
 const userSchema = new Schema({
@@ -50,7 +60,7 @@ userSchema.plugin(paginate);
 /**
  * Schéma de la collection `posts`.
  *
- * @type {Schema<import('../../types/schemas.types').Post>}
+ * @type {mongoose.Schema<Post, PostModel>}
  * @author Roger Montero
  */
 const postSchema = new Schema({
@@ -116,7 +126,7 @@ postSchema.plugin(paginate);
 /**
  * Schéma de la collection `tags`.
  *
- * @type {Schema<import('../../types/schemas.types').Tag>}
+ * @type {mongoose.Schema<Tag, TagModel>}
  * @author Roger Montero
  */
 const tagSchema = new Schema({

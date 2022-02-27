@@ -1,27 +1,43 @@
 import { Types } from "mongoose";
 
+type SocialsDetailsUser = {
+  twitter?: string;
+  facebook?: string;
+  website?: string;
+};
+
+type LocationDetailsUser = {
+  city?: string;
+  country?: string;
+};
+
+type DetailsUser = {
+  bio?: string;
+  workplace?: string;
+  socials?: SocialsDetailsUser;
+  location?: LocationDetailsUser;
+};
+
 export type User = {
   username: string;
   email: string;
   emailVerified: boolean;
   picture: string;
-  details?: {
-    bio?: string;
-    workplace?: string;
-    socials?: {
-      twitter?: string;
-      facebook?: string;
-      website?: string;
-    };
-    location?: {
-      city?: string;
-      country?: string;
-    };
-  };
+  details?: DetailsUser;
   posts: Types.ObjectId[];
   likedPosts: Types.ObjectId[];
   followers: Types.ObjectId[];
   following: Types.ObjectId[];
+};
+
+type CommentPost = {
+  user: Types.ObjectId;
+  comment: string;
+};
+
+type MetaDataPost = {
+  likes: Types.ObjectId[];
+  views: number;
 };
 
 export type Post = {
@@ -32,14 +48,8 @@ export type Post = {
   visibility: "public" | "private";
   date: Date;
   tags: Types.ObjectId[];
-  meta: {
-    likes: Types.ObjectId[];
-    views: number;
-  };
-  comments: {
-    user: Types.ObjectId;
-    comment: string;
-  }[];
+  meta: MetaDataPost;
+  comments: CommentPost[];
 };
 
 export type Tag = {
