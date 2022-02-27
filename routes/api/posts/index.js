@@ -108,7 +108,7 @@ router.post('/:id/comment', checkJwt, async (req, res, next) => {
       comment,
     });
     res.status(200)
-      .json(post.comments.toJSON());
+      .json(post.comments.toObject({ virtuals: true }));
   } catch (err) {
     next(err);
   }

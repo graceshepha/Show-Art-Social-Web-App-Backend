@@ -33,6 +33,7 @@ export type User = {
 type CommentPost = {
   user: Types.ObjectId;
   comment: string;
+  date: Date;
 };
 
 type MetaDataPost = {

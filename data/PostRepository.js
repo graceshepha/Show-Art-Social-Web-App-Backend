@@ -145,6 +145,7 @@ class PostRepository {
     try {
       return await this.#model.findById(id)
         .populate({ path: 'owner' })
+        .populate({ path: 'comments.user', select: 'id username picture' })
         .exec();
     } catch (err) {
       debug(err);
@@ -225,7 +226,7 @@ class PostRepository {
       const post = await this.#model.findByIdAndUpdate(
         id,
         { $push: { comments: comment } },
-        { new: true },
+        { new: true, populate: { path: 'comments.user', select: 'id username picture' } },
       );
       if (!post) throw EntityNotFound();
       return post;

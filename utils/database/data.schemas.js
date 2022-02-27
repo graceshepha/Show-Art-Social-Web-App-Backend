@@ -119,6 +119,11 @@ const postSchema = new Schema({
       immutable: true,
     },
     comment: { type: String, immutable: true },
+    date: {
+      type: Date,
+      default: Date.now,
+      immutable: true,
+    },
   }],
 }, { id: true });
 // postSchema.plugin(uniqueValidator, { message: 'Error, expected {PATH} to be unique.' });
