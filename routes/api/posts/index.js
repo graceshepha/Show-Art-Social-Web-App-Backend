@@ -73,51 +73,35 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// ajouter la route pr addLike
-router.get('/:idUser/:idPost', checkJwt, async (req, res, next) => {
+/**
+ * La route pour ajouter un like
+ * @author My-Anh Chau
+ */
+router.post('/:idPost/like', checkJwt, async (req, res, next) => {
   try {
-  // on get le id
-    const { idUser } = req.params;
+    const email = req.auth.payload['http://localhost//email'];
+    const user = await userRepository.findByEmail(email);
+    if (!user) throw EntityNotFound();
     const { idPost } = req.params;
-    // const post = await postRepository.findById(idPost);
-    // idUser = userLiker
-    // idPost = idPost du owner
-    await postRepository.addLike(idUser, idPost);
-    // si post/user existe pas ou a pas de nbr de string correspondant
-    // if (!user || !post) throw EntityNotFound();
-    res.status(201).end();
+    await postRepository.addLike(user.id, idPost);
+    res.status(204).end();
   } catch (err) {
     next(err);
   }
 });
 
-
-
-router.post('/:idPost/favorite', checkJwt, async (req, res, next) => {
+/**
+ * La route pour enlever un like
+ * @author My-Anh Chau
+ */
+router.delete('/:idPost/like', checkJwt, async (req, res, next) => {
   try {
+    const email = req.auth.payload['http://localhost//email'];
+    const user = await userRepository.findByEmail(email);
+    if (!user) throw EntityNotFound();
     const { idPost } = req.params;
-    // checkJwt
-    await postRepository.addLike(idUser, idPost);
-    res.status(201).end();
-  } catch (err) {
-    next(err);
-  }
-});
-
-// ajouter la route pr removelike
-router.delete('/:idUser/:idPost', checkJwt, async (req, res, next) => {
-  try {
-  // on get le id dans les url params
-    const { idUser } = req.params;
-    const { idPost } = req.params;
-    // const user = await postRepository.findById(idUser);
-    // const post = await postRepository.findById(idPost);
-    // idUser = userLiker
-    // idPost = idPost du owner
-    await postRepository.removeLike(idUser, idPost);
-    // si post/user existe pas ou a pas de nbr de string correspondant
-    // if (!user || !post) throw EntityNotFound();
-    res.status(200).end();
+    await postRepository.removeLike(user.id, idPost);
+    res.status(204).end();
   } catch (err) {
     next(err);
   }

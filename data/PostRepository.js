@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 const debug = require('debug')('backend:postRepository');
-const req = require('express/lib/request');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
 const {
@@ -54,33 +53,21 @@ class PostRepository {
     }
   }
 
-  // PostRepo: addLike(userid) / removeLike(userid)
-  // userid = celui qui a like
-
   /**
    * @author My-Anh Chau
    */
   async addLike(userid, postid) {
+    if (!userid || !postid) throw InvalidKey('Id cannot be null');
     try {
-      // AVEC LE POST REPOSITORY
-      //
-      // postid de la photo qui est like
-      // userId de l'utilisateur qui a like la photo
-      //
-      // retourne lobj du user qui a like
-
-      // retourne lobjet du post qui a ete like
-      const post = await this.#model.findById(postid);
+      const post = await this.#model.findByIdAndUpdate(
+        postid,
+        { $push: { 'meta.likes': new mongoose.Types.ObjectId(userid) } },
+        { new: true },
+      );
       if (!post) throw EntityNotFound();
-      // const user = await userRepository.findUserById(userid);
-      // insert user to the like array qui sapelle likedPosts
-      // inserer le userId dans le array de post qui a ete like
-      //
-      // inserer le userId dans le array likes
-      post.meta.likes.push(new mongoose.Types.ObjectId(userid));
-      await userRepository.addLikedPost(userid, postid);
-      await post.save();
+      userRepository.addLikedPost(userid, postid);
     } catch (err) {
+      if (err.name === 'CustomError') { throw err; }
       throw UnknownError();
     }
   }
@@ -89,32 +76,17 @@ class PostRepository {
    * @author My-Anh Chau
    */
   async removeLike(userid, postid) {
+    if (!userid || !postid) throw InvalidKey('Id cannot be null');
     try {
-    // userId = userLiker
-    // postId = postId du owner
-      // prendre obj du post de lutilisateur
-      const post = await this.#model.findById(postid);
-      const user = await userRepository.findUserById(userid);
-      if (!post || !user) throw EntityNotFound();
-      // remove user to the like array qui sapelle likedPosts
-      // this.#model.likes.splice(new mongoose.Types.ObjectId(userid));
-      // Faire quelque chose de similaire
-      // post.meta.likes.findByIdDel(new mongoose.Types.ObjectId(userid));
-      // { $push: { <post.meta.likes>: <value1>, ... } }
-      // Remove object by id from an array in mongoose ( enlever le like du liker)
-      post.update(
-        { $pull: { 'post.meta.likes': new mongoose.Types.ObjectId(postid) } },
+      const post = await this.#model.findByIdAndUpdate(
+        postid,
+        { $pull: { 'meta.likes': new mongoose.Types.ObjectId(userid) } },
+        { new: true },
       );
-      // la il faut trouver le userid tu userOwner
-      // const email = PostRepository.req.auth.payload['http:localhost//email'];
-      // userId = userLiker
-      // postId = postId du owner
-      debug(post.meta.likes);
-      debug(new mongoose.Types.ObjectId(postid));
+      if (!post) throw EntityNotFound();
       userRepository.removeLikedPost(userid, postid);
-      post.save();
-      return await user.save();
     } catch (err) {
+      if (err.name === 'CustomError') { throw err; }
       throw UnknownError();
     }
   }

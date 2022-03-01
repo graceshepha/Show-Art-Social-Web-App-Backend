@@ -2,7 +2,9 @@
 const debug = require('debug')('backend:UserRepository');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
-const { UnknownError, DuplicatedUnique, EntityNotFound } = require('../utils/errors');
+const {
+  UnknownError, InvalidKey, DuplicatedUnique, EntityNotFound,
+} = require('../utils/errors');
 /**
  * @typedef {import('../types/schemas.types').User} User
  */
@@ -50,33 +52,18 @@ class UserRepository {
     }
   }
 
-  // UserRepo: addLikedPost(postid) / removeLikedPost(postid)
   /**
+   * Insertion dun likes a un utilisateur
    * @author My-Anh Chau
    */
-  // Insertion dun likes a un utilisateur
-  // chaque utilisateur a un id
   async addLikedPost(userid, postid) {
-    // userOwner doit avoir userliker ds sa liste de like
-    // userliker doit avoir userOwner ds sa liste de addlikedPost
-    // userid celui qui like
-    // postid post qui est like
-    if (!userid || !postid) throw new Error('Id cannot be null');
-    // veut recevoir le post a ajouter postid mais aussi recevoir = postid
-    // une facon dideentifier utilisateur qui a like = userid
-    // objet d'un utilisateur qui a post
-    // get utilisateur qui a like
-    // get utilisateur qui se fait like
-    // const userOwner = await postRepository.findById(postid);
+    if (!userid || !postid) throw InvalidKey('Id cannot be null');
     try {
-      const userLiker = await this.#model.findById(userid).exec();
-      if (!userLiker) throw EntityNotFound();
-      // get userLiker a avoir ses like de user
-      // userOwner.meta.likes.push(new mongoose.Types.ObjectId(userid));
-      //  insert dans userLiker son likedpost
-      userLiker.likedPosts.push(new mongoose.Types.ObjectId(postid));
-      // userOwner.save();
-      await userLiker.save();
+      const user = await this.#model.findByIdAndUpdate(
+        userid,
+        { $push: { likedPosts: new mongoose.Types.ObjectId(postid) } },
+        { new: true },
+      );
     } catch (err) {
       debug(err);
       throw UnknownError();
@@ -87,23 +74,16 @@ class UserRepository {
    * @author My-Anh Chau
    */
   async removeLikedPost(userid, postid) {
-    // userId = userLiker
-    // postId = postId du owner
-    if (!userid || !postid) throw new Error('Id cannot be null');
-    // objet d'un utilisateur qui a post
-    const userLiker = await this.#model.findById(userid).exec();
-    // apelle de la fonct bd pr ajouter
-    if (!userLiker) throw EntityNotFound();
+    if (!userid || !postid) throw InvalidKey('Id cannot be null');
     try {
-      // il faut trouver le id du owner
-
-      // userLiker.likedPosts.findByIdAndDelete(new mongoose.Types.ObjectId(postid));
-      userLiker.update(
-        { $pull: { likedPosts: new mongoose.Types.ObjectId(userid) } },
+      const user = await this.#model.findByIdAndUpdate(
+        userid,
+        { $pull: { likedPosts: new mongoose.Types.ObjectId(postid) } },
+        { new: true },
       );
-      userLiker.save();
+      if (!user) throw EntityNotFound();
     } catch (err) {
-      debug(err);
+      if (err.name === 'CustomError') { throw err; }
       throw UnknownError();
     }
   }
