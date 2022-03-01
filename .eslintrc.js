@@ -11,5 +11,6 @@ module.exports = {
   rules: {
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'no-unused-vars': 'warn',
+    'no-underscore-dangle': 0,
   },
 };

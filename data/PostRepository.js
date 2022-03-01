@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 const debug = require('debug')('backend:postRepository');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
@@ -6,14 +5,27 @@ const {
   DuplicatedUnique, UnknownError, InvalidKey, EntityNotFound,
 } = require('../utils/errors');
 const userRepository = require('./UserRepository');
+/**
+ * @typedef {import('../types/schemas.types').Post} Post
+ * @typedef {mongoose.HydratedDocument<Post>} PostDocument
+ * @typedef {mongoose.PaginateDocument<Post, {}>} PostPaginatedDocument
+ * @typedef {mongoose.PaginateResult<PostPaginatedDocument>} PostPaginatedResult
+ */
 
-/** @type {import('mongoose').PaginateOptions} */
+/**
+ * @ignore
+ * @type {mongoose.PaginateOptions}
+ */
 const options = {
   lean: true,
-  limit: 1,
+  limit: 10,
   sort: { date: -1 },
 };
 
+/**
+ * Dépot d'un post qui possède tous les fonctions CRUD
+ * d'un post dans l'application.
+ */
 class PostRepository {
   #model;
 
@@ -23,17 +35,19 @@ class PostRepository {
   }
 
   /**
+   * @param {Post} info Informations initiales du post a insérer
+   * @returns {Promise<PostDocument>}
+   *
    * @author My-Anh Chau
    * @author Bly Grâce Schephatia
    */
   async insertOne(info) {
+    /** @type {PostDocument} */
     const post = new this.#model(info);
     // VALIDATE
     try {
-      await this.#model.validate(post);
-      // MUST INSERT POST TO USER ARRAY !!
-      userRepository.insertPost(post.owner, post._id);
-      console.log(post.owner);
+      await post.validate();
+      userRepository.insertPost(post.owner, post._id); // MUST INSERT POST TO USER ARRAY !!
       return await post.save();
     } catch (err) {
       if (err.name === 'ValidationError') {
@@ -92,36 +106,20 @@ class PostRepository {
   }
 
   /**
+   * @param {string | mongoose.Types.ObjectId} id Id du post à chercher
+   * @returns {Promise<PostDocument>} Document du post
+   *
    * @author My-Anh Chau
    */
-
-  // mettre dans post les informations de un post specifique avec le id
-  async getOne(id) {
-    // faire un trycatch avec un string qui doit etre sup a 24
-    // catch les erreurs possibles
-    try {
-    // prendre obj selon le id
-      const post = await this.#model.findById(id).exec();
-      return post;
-    } catch (err) {
-      debug(err);
-      throw UnknownError();
-      // raison qui peut avoir une erreur
-      // que sa soit pas assez de string
-    }
-  }
-
-  /**
-   * @author My-Anh Chau
-   */
-  async findById(id) {
+  async findPostById(id) {
     // mettre dans post les informations de un post specifique avec le id
     // faire un trycatch avec un string qui doit etre sup a 24
     // catch les erreurs possibles
     try {
-      const post = this.#model.findById(id);
-      post.populate({ path: 'owner' });
-      return await post.exec();
+      return await this.#model.findById(id)
+        .populate({ path: 'owner' })
+        .populate({ path: 'comments.user', select: 'id username picture' })
+        .exec();
     } catch (err) {
       debug(err);
       throw InvalidKey(err.message);
@@ -131,6 +129,7 @@ class PostRepository {
   }
 
   /**
+   * @ignore
    * @author My-Anh Chau
    */
   async findByIdDel(id) {
@@ -146,6 +145,9 @@ class PostRepository {
   }
 
   /**
+   * @param {mongoose.PaginateOptions} options
+   * @returns {Promise<PostPaginatedResult>} Documents des posts paginés
+   *
    * @author Bly Grâce Schephatia
    */
   async getAll({ offset, page = 1 }) {
@@ -159,6 +161,52 @@ class PostRepository {
     } catch (err) {
       debug(err);
       throw UnknownError();
+    }
+  }
+
+  /**
+   * Ajoute une view à un post
+   *
+   * @param {string} id Id du post
+   * @author Roger Montero
+   */
+  async addView(id) {
+    try {
+      const post = await this.#model.findByIdAndUpdate(
+        id,
+        { $inc: { 'meta.views': 1 } },
+      );
+      if (!post) throw EntityNotFound();
+    } catch (err) {
+      debug(err);
+      if (err.name === 'CustomError') throw err;
+      throw InvalidKey();
+    }
+  }
+
+  /**
+   * Ajoute un commentaire à un post
+   *
+   * @param {string} id Id du post
+   * @param {{user: string, comment: string}} comment Commentaire a insérer
+   * @returns {Promise<PostDocument>} Document du post commentée
+   *
+   * @author Roger Montero
+   */
+  async addComment(id, comment) {
+    if (!comment && !comment.id && !comment.user) throw InvalidKey();
+    try {
+      const post = await this.#model.findByIdAndUpdate(
+        id,
+        { $push: { comments: comment } },
+        { new: true, populate: { path: 'comments.user', select: 'id username picture' } },
+      );
+      if (!post) throw EntityNotFound();
+      return post;
+    } catch (err) {
+      debug(err);
+      if (err.name === 'CustomError') throw err;
+      throw InvalidKey();
     }
   }
 }

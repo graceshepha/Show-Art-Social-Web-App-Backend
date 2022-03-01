@@ -12,12 +12,15 @@ router.use('/u', users);
 // on va pas l'utiliser encore
 router.use('/p', posts);
 
+/**
+ * @author Bly Grâce Schephatia
+ */
 router.get('/me', checkJwt, async (req, res, next) => {
   try {
     const email = req.auth.payload['http://localhost//email'];
     const user = await userRepository.findByEmail(email);
     if (!user) throw EntityNotFound();
-    res.status(200).json({ user });
+    res.status(200).json(user.toJSON({ virtuals: true }));
   } catch (err) {
     next(err);
   }
