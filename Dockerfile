@@ -7,7 +7,7 @@ RUN apk --no-cache -U upgrade
 RUN npm i -g pm2
 
 # create destination directory change ownership
-RUN mkdir -p /home/node/app
+RUN mkdir -p /home/node/app/public/images
 
 # use /home/node/app as working directory
 WORKDIR /home/node/app
@@ -19,7 +19,6 @@ COPY package*.json process.yml ./
 RUN npm i --only=production
 
 # copy files
-# COPY --chown=node:node --from=builder /app/dist ./dist
 COPY . .
 
 # change ownership
