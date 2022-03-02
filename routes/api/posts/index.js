@@ -134,7 +134,7 @@ router.get('/:id/like', checkJwt, async (req, res, next) => {
 });
 
 /**
- * La route pour ajouter un like
+ * La route pour ajouter un like dans un post
  * @author My-Anh Chau
  */
 router.post('/:idPost/like', checkJwt, async (req, res, next) => {
@@ -151,7 +151,7 @@ router.post('/:idPost/like', checkJwt, async (req, res, next) => {
 });
 
 /**
- * La route pour enlever un like
+ * La route pour enlever un like dans un post
  * @author My-Anh Chau
  */
 router.delete('/:idPost/like', checkJwt, async (req, res, next) => {
