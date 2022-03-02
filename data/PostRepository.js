@@ -105,6 +105,7 @@ class PostRepository {
   }
 
   /**
+   * Enlever le user qui a like dans la liste des likes du posts
    * @author My-Anh Chau
    */
   async removeLike(userid, postid) {
