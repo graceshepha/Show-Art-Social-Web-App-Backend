@@ -210,6 +210,31 @@ class UserRepository {
   }
 
   /**
+   * Trouve toutes les informations d'un utilisateur avec son courriel.
+   *
+   * @param {string} email Courriel de l'utilisateur
+   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé ou `null`.
+   * @throws {CustomError}
+   *
+   * @author Roger Montero
+   */
+  async findAllUserInfoByEmail(email) {
+    if (!email) throw InvalidKey('Email was not received');
+    try {
+      return await this.#model
+        .findOne({ email })
+        .populate('posts')
+        .populate('likedPosts')
+        .populate('followers')
+        .populate('following')
+        .exec();
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+    }
+  }
+
+  /**
    * Trouve un utilisateur avec son username.
    *
    * @param {string} username Username de l'utilisateur
@@ -306,6 +331,7 @@ class UserRepository {
       return await this.#model
         .findOne({ username }, 'likedPosts')
         .populate('likedPosts')
+        .populate('owner')
         .exec();
     } catch (err) {
       debug(err);
