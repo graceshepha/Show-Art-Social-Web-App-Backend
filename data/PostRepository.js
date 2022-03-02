@@ -68,6 +68,7 @@ class PostRepository {
   }
 
   /**
+   * Ajouter le user qui a like dans la liste des likes du post
    * @author My-Anh Chau
    */
   async addLike(userid, postid) {

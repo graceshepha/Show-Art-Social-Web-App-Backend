@@ -70,7 +70,7 @@ class UserRepository {
   }
 
   /**
-   * Insertion dun likes a un utilisateur
+   * Insertion dun likes dans le array de likedPost
    * @author My-Anh Chau
    */
   async addLikedPost(userid, postid) {
@@ -90,6 +90,7 @@ class UserRepository {
   }
 
   /**
+   * Effacer le postId dans le array de likedPost
    * @author My-Anh Chau
    */
   async removeLikedPost(userid, postid) {
