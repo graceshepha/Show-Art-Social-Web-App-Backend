@@ -27,6 +27,10 @@ const options = {
  * d'un post dans l'application.
  */
 class PostRepository {
+  /**
+   * Modèle des posts
+   * @memberof PostRepository
+   */
   #model;
 
   /** @constructor */

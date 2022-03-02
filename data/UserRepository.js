@@ -28,12 +28,14 @@ const options = {
 const withRandom = (str) => `${str}-${Math.floor(100000 + Math.random() * 900000)}`;
 
 /**
- * Dépot d'un utilisateur qui possède tous les fonctions CRUD
- * d'un utilisateur dans l'application.
- *
- * @author Roger Montero
+ * Dépot de la collection des utilisateurs qui possède tous les fonctions logiques
+ * pour le CRUD des données
  */
 class UserRepository {
+  /**
+   * Modèle des utilisateurs
+   * @memberof UserRepository
+   */
   #model;
 
   /** @constructor */

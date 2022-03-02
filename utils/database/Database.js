@@ -17,12 +17,16 @@ const schemas = require('./data.schemas');
  */
 class DatabaseClient {
   /**
+   * L'instance du client
+   *
    * @memberof DatabaseClient
    * @type {mongoose.Connection | undefined}
    */
   #client;
 
   /**
+   * L'état de la base de donnéee
+   *
    * @memberof DatabaseClient
    * @type {boolean}
    */
@@ -62,11 +66,20 @@ class DatabaseClient {
     });
   }
 
+  /**
+   * Le état du client de la base de donnée
+   *
+   * @return {boolean} True si la base de donnée est connectée
+   * @memberof DatabaseClient
+   */
   isConnected() {
     return this.#connected;
   }
 
-  /** Create and initialize models */
+  /**
+   * Initialise les modèles
+   * @memberof DatabaseClient
+   */
   #initModels() {
     // Init just in case
     this.getUserModel();
@@ -75,9 +88,11 @@ class DatabaseClient {
   }
 
   /**
-   * Returns model of a User
+   * Crée le modèle des utilisateurs et le retourne
+   *
    * @returns {schemas.UserModel} User model
    * @throws {DatabaseError}
+   * @memberof DatabaseClient
    */
   getUserModel() {
     if (!this.isConnected) throw NotConnected();
@@ -85,20 +100,23 @@ class DatabaseClient {
   }
 
   /**
-   * Returns model of a Post
+   * Crée le modèle des posts et le retourne
+   *
    * @returns {schemas.PostModel} Post model
    * @throws {DatabaseError}
+   * @memberof DatabaseClient
    */
   getPostModel() {
     if (!this.isConnected) throw NotConnected();
-    // @ts-ignore
     return this.#client.model('Post', schemas.postSchema);
   }
 
   /**
-   * Returns model of a Tag
+   * Crée le modèle des tags et le retourne
+   *
    * @returns {schemas.TagModel} Tag model
    * @throws {DatabaseError}
+   * @memberof DatabaseClient
    */
   getTagModel() {
     if (!this.isConnected) throw NotConnected();
@@ -106,6 +124,11 @@ class DatabaseClient {
     return this.#client.model('Tag', schemas.tagSchema);
   }
 
+  /**
+   * Closes the database
+   *
+   * @memberof DatabaseClient
+   */
   close() {
     this.#client.close();
     this.#connected = false;
