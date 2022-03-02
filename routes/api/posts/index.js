@@ -117,6 +117,23 @@ router.post('/:id/comment', checkJwt, async (req, res, next) => {
 });
 
 /**
+ * La route pour voir si post a ete like
+ * @author Roger Montero
+ */
+router.get('/:id/like', checkJwt, async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const email = req.auth.payload['http://localhost//email'];
+    const user = await userRepository.findByEmail(email);
+    if (!user) throw EntityNotFound();
+    const hasLiked = await postRepository.hasLiked(user.id, id);
+    res.status(200).json({ hasLiked });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * La route pour ajouter un like
  * @author My-Anh Chau
  */

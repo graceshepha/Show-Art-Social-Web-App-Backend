@@ -249,10 +249,111 @@ class UserRepository {
     }
   }
 
-  // find /user/:username/posts
-  // find /user/:username/likes
-  // find /user/:username/followers
-  // find /user/:username/following
+  /**
+   * Trouve un utilisateur avec son username.
+   *
+   * @param {string} username Username de l'utilisateur
+   * @param {string} select Fields à retourner
+   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé ou `null`.
+   * @throws {CustomError}
+   *
+   * @author Roger Montero
+   */
+  async findByUsernameSelect(username, select) {
+    if (!select) throw InvalidKey();
+    try {
+      return await this.#model
+        .findOne({ username }, select)
+        .exec();
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+    }
+  }
+
+  /**
+   * Trouver les posts d'un utilisateur avec son username.
+   *
+   * @param {string} username Username de l'utilisateur
+   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé ou `null`.
+   * @throws {CustomError}
+   *
+   * @author Roger Montero
+   */
+  async findUserPostsByUsername(username) {
+    try {
+      return await this.#model
+        .findOne({ username }, 'posts')
+        .populate('posts')
+        .exec();
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+    }
+  }
+
+  /**
+   * Trouve les likes d'un utilisateur avec son username.
+   *
+   * @param {string} username Username de l'utilisateur
+   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé ou `null`.
+   * @throws {CustomError}
+   *
+   * @author Roger Montero
+   */
+  async findUserLikesByUsername(username) {
+    try {
+      return await this.#model
+        .findOne({ username }, 'likedPosts')
+        .populate('likedPosts')
+        .exec();
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+    }
+  }
+
+  /**
+   * Trouve les followers d'un utilisateur avec son username.
+   *
+   * @param {string} username Username de l'utilisateur
+   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé ou `null`.
+   * @throws {CustomError}
+   *
+   * @author Roger Montero
+   */
+  async findUserFollowersByUsername(username) {
+    try {
+      return await this.#model
+        .findOne({ username }, 'followers')
+        .populate('followers')
+        .exec();
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+    }
+  }
+
+  /**
+   * Trouve les following d'un utilisateur avec son username.
+   *
+   * @param {string} username Username de l'utilisateur
+   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé ou `null`.
+   * @throws {CustomError}
+   *
+   * @author Roger Montero
+   */
+  async findUserFollowingByUsername(username) {
+    try {
+      return await this.#model
+        .findOne({ username }, 'following')
+        .populate('following')
+        .exec();
+    } catch (err) {
+      debug(err);
+      throw InvalidKey(err.message);
+    }
+  }
 }
 
 module.exports = new UserRepository();

@@ -68,6 +68,23 @@ class PostRepository {
   }
 
   /**
+   * @author Roger Montero
+   */
+  async hasLiked(userid, postid) {
+    if (!userid || !postid) throw InvalidKey('Id cannot be null');
+    try {
+      const post = await this.#model.findOne({
+        _id: new mongoose.Types.ObjectId(postid),
+        'meta.likes': new mongoose.Types.ObjectId(userid),
+      }).exec();
+      return !!post;
+    } catch (err) {
+      if (err.name === 'CustomError') { throw err; }
+      throw UnknownError();
+    }
+  }
+
+  /**
    * @author My-Anh Chau
    */
   async addLike(userid, postid) {

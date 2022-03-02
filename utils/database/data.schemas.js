@@ -54,7 +54,23 @@ const userSchema = new Schema({
   likedPosts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-}, { id: true });
+}, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
+userSchema.virtual('countPosts')
+  .get(function get() {
+    return this.posts?.length || 0;
+  });
+userSchema.virtual('countLikedPosts')
+  .get(function get() {
+    return this.posts?.length || 0;
+  });
+userSchema.virtual('countFollowers')
+  .get(function get() {
+    return this.followers?.length || 0;
+  });
+userSchema.virtual('countFollowings')
+  .get(function get() {
+    return this.following?.length || 0;
+  });
 // userSchema.plugin(uniqueValidator, { message: 'Error, expected {PATH} to be unique.' });
 userSchema.plugin(paginate);
 /**
@@ -125,7 +141,15 @@ const postSchema = new Schema({
       immutable: true,
     },
   }],
-}, { id: true });
+}, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
+postSchema.virtual('countLikes')
+  .get(function get() {
+    return this.meta.likes.length;
+  });
+postSchema.virtual('countComments')
+  .get(function get() {
+    return this.comments.length;
+  });
 // postSchema.plugin(uniqueValidator, { message: 'Error, expected {PATH} to be unique.' });
 postSchema.plugin(paginate);
 /**
@@ -144,7 +168,7 @@ const tagSchema = new Schema({
   },
   description: String,
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
-}, { id: true });
+}, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 // tagSchema.plugin(uniqueValidator, { message: 'Error, expected {PATH} to be unique.' });
 tagSchema.plugin(paginate);
 
