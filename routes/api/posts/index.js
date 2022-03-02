@@ -9,7 +9,7 @@ const checkJwt = require('../../../utils/middleware/checkJwt');
 const { EntityNotFound } = require('../../../utils/errors');
 
 /**
- * Cette route retourne tous les posts avec pagination
+ * Route `GET /api/p/` qui retourne tous les posts avec pagination
  * @author Bly, Grâce Schephatia
  */
 router.get('/', async (req, res, next) => {
@@ -44,7 +44,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /**
- * Cette route ajoute un post
+ * Route `POST /api/p/` qui ajoute un post
  * @author Bly Grâce Schephatia
  */
 router.post('/', checkJwt, upload.single('image'), async (req, res, next) => {
@@ -64,7 +64,7 @@ router.post('/', checkJwt, upload.single('image'), async (req, res, next) => {
 });
 
 /**
- * Cette route permet d'obtenir un seul post avec son id /api/p/{postId}
+ * Route `GET /api/p/:id` qui permet d'obtenir un seul post avec son id
  * @author My-Anh Chau
  */
 router.get('/:id', async (req, res, next) => {
@@ -87,7 +87,7 @@ router.post('/:id/view', async (req, res, next) => {
   const { id } = req.params;
   try {
     await postRepository.addView(id);
-    res.status(201)
+    res.status(204)
       .end();
   } catch (err) {
     next(err);
@@ -96,7 +96,7 @@ router.post('/:id/view', async (req, res, next) => {
 
 /**
  * Route `POST /api/p/:id/comment` pour ajouter un commentaire qui retourne une réponse 200
- * avec le array des comments du post.
+ * avec tous les comments du post.
  * @author Roger Montero
  */
 router.post('/:id/comment', checkJwt, async (req, res, next) => {
@@ -117,7 +117,7 @@ router.post('/:id/comment', checkJwt, async (req, res, next) => {
 });
 
 /**
- * La route pour voir si post a ete like
+ * Route `GET /p/:id/like` qui permet de voir si post à été aimé par l'utilisateur
  * @author Roger Montero
  */
 router.get('/:id/like', checkJwt, async (req, res, next) => {
@@ -134,7 +134,7 @@ router.get('/:id/like', checkJwt, async (req, res, next) => {
 });
 
 /**
- * La route pour ajouter un like dans un post
+ * Route `POST /p/:id/like` qui permet d'ajouter un like à post
  * @author My-Anh Chau
  */
 router.post('/:idPost/like', checkJwt, async (req, res, next) => {
@@ -151,7 +151,7 @@ router.post('/:idPost/like', checkJwt, async (req, res, next) => {
 });
 
 /**
- * La route pour enlever un like dans un post
+ * Route `DELETE /p/:id/like` qui permet d'enlever un like à post
  * @author My-Anh Chau
  */
 router.delete('/:idPost/like', checkJwt, async (req, res, next) => {
