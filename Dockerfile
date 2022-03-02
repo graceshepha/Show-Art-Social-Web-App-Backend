@@ -1,27 +1,4 @@
-FROM node:17-alpine AS node
-
-# Builder stage
-
-# FROM node AS builder
-
-# use /app as working directory
-# WORKDIR /app
-
-# copy package and package-lock
-# COPY package*.json ./
-
-# install all dependencies
-# RUN npm i
-
-# copy other files
-# COPY . .
-
-# build app
-# RUN npm run build
-
-# Final stage
-
-FROM node AS final
+FROM node:lts-alpine
 
 # update system
 RUN apk --no-cache -U upgrade
@@ -30,7 +7,7 @@ RUN apk --no-cache -U upgrade
 RUN npm i -g pm2
 
 # create destination directory change ownership
-RUN mkdir -p /home/node/app
+RUN mkdir -p /home/node/app/public/images
 
 # use /home/node/app as working directory
 WORKDIR /home/node/app
@@ -42,7 +19,6 @@ COPY package*.json process.yml ./
 RUN npm i --only=production
 
 # copy files
-# COPY --chown=node:node --from=builder /app/dist ./dist
 COPY . .
 
 # change ownership
@@ -52,7 +28,7 @@ RUN chown -R node:node /home/node/app
 USER node
 
 # open port
-EXPOSE ${NODE_PORT}
+EXPOSE 8080
 
 # use pm2 to run the application as stated in config file
 ENTRYPOINT ["pm2-runtime", "./process.yml"]

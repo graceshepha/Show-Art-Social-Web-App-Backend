@@ -18,9 +18,10 @@ router.use('/p', posts);
 router.get('/me', checkJwt, async (req, res, next) => {
   try {
     const email = req.auth.payload['http://localhost//email'];
-    const user = await userRepository.findByEmail(email);
+    const user = await userRepository.findAllUserInfoByEmail(email);
     if (!user) throw EntityNotFound();
-    res.status(200).json(user.toJSON({ virtuals: true }));
+    res.status(200)
+      .json(user.toJSON());
   } catch (err) {
     next(err);
   }
