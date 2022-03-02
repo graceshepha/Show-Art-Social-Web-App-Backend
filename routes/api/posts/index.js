@@ -13,8 +13,10 @@ const { EntityNotFound } = require('../../../utils/errors');
  * @author Bly, Grâce Schephatia
  */
 router.get('/', async (req, res, next) => {
+  const search = typeof req.query.search === 'string' ? req.query.search : '';
   try {
     const posts = await postRepository.getAll(
+      search,
       new PaginationParameters(req).getOptions(),
     );
     res.status(200).json(posts);

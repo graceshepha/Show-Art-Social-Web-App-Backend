@@ -44,21 +44,24 @@ class UserRepository {
   /**
    * Trouver tous les documents de la collection
    *
+   * @param {string} search Filtre (by username)
    * @param {mongoose.PaginateOptions} options Options de la pagination
    * @returns {Promise<UserPaginatedResult>} Liste de tous les utilisateurs
    *
    * @author Roger Montero
    */
-  async getAll({ offset, page = 1 }) {
+  async getAll(search, { select, page = 1 }) {
     const o = {
       ...options,
+      page,
+      select,
     };
-    if (!offset) o.page = page;
-    else o.offset = offset;
-    o.populate = { path: 'posts' }
+    o.populate = { path: 'posts' };
+
+    const searchFilter = search ? { username: { $regex: new RegExp(search, 'i') } } : {};
 
     try {
-      const u = await this.#model.paginate({}, o);
+      const u = await this.#model.paginate(searchFilter, o);
       return u;
     } catch (err) {
       debug(err);
@@ -78,8 +81,10 @@ class UserRepository {
         { $push: { likedPosts: new mongoose.Types.ObjectId(postid) } },
         { new: true },
       );
+      if (!user) throw EntityNotFound();
     } catch (err) {
       debug(err);
+      if (err.name === 'CustomError') { throw err; }
       throw UnknownError();
     }
   }

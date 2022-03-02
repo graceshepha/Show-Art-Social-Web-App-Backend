@@ -145,19 +145,24 @@ class PostRepository {
   }
 
   /**
+   * @param {string} search Filtre (by title)
    * @param {mongoose.PaginateOptions} options
    * @returns {Promise<PostPaginatedResult>} Documents des posts paginés
    *
    * @author Bly Grâce Schephatia
    */
-  async getAll({ offset, page = 1 }) {
-    const o = { ...options };
-    if (!offset) o.page = page;
-    else o.offset = offset;
+  async getAll(search, { select, page = 1 }) {
+    const o = {
+      ...options,
+      page,
+      select,
+    };
     o.populate = { path: 'owner' };
 
+    const searchFilter = search ? { title: { $regex: new RegExp(search, 'i') } } : {};
+
     try {
-      return await this.#model.paginate({}, o);
+      return await this.#model.paginate(searchFilter, o);
     } catch (err) {
       debug(err);
       throw UnknownError();

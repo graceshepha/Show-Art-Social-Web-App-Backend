@@ -9,8 +9,12 @@ const checkJwt = require('../../../utils/middleware/checkJwt');
  * @author Roger Montero
  */
 router.get('/', async (req, res, next) => {
+  const search = typeof req.query.search === 'string' ? req.query.search : '';
   try {
-    const users = await userRepository.getAll(new PaginationParameters(req).getOptions());
+    const users = await userRepository.getAll(
+      search,
+      new PaginationParameters(req).getOptions(),
+    );
     res.status(200)
       .json(users);
   } catch (err) {
