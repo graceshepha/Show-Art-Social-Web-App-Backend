@@ -61,7 +61,7 @@ userSchema.virtual('countPosts')
   });
 userSchema.virtual('countLikedPosts')
   .get(function get() {
-    return this.posts?.length || 0;
+    return this.likedPosts?.length || 0;
   });
 userSchema.virtual('countFollowers')
   .get(function get() {
