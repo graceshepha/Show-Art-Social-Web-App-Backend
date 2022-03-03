@@ -21,8 +21,8 @@ $ npm run start
 ```
 
 ### Auteurs
-[My-Anh Chau](e1575632@cmaisonneuve.qc.ca)
+[My-Anh Chau](https://gitlab.com/myanhChau)
 
-[Bly Grâce Schephatia](e1234567@cmaisonneuve.qc.ca)
+[Bly Grâce Schephatia](https://gitlab.com/Schephatia)
 
-[Roger Montero](e1575710@cmaisonneuve.qc.ca)
+[Roger Montero](https://gitlab.com/beiko)
