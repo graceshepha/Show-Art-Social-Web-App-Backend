@@ -6,7 +6,6 @@ const checkJwt = require('../../../utils/middleware/checkJwt');
 
 /**
  * Route `GET /api/u/` qui retourne tous les utilisateurs avec pagination
- *
  * @author Roger Montero
  */
 router.get('/', async (req, res, next) => {
@@ -26,7 +25,6 @@ router.get('/', async (req, res, next) => {
 /**
  * Route `POST /api/u/login` qui ajoute un nouveau utilisateur
  * ou mets à jour ses données au moment de ses connexion
- *
  * @author Roger Montero
  */
 router.post('/login', checkJwt, async (req, res, next) => {
@@ -43,7 +41,6 @@ router.post('/login', checkJwt, async (req, res, next) => {
 
 /**
  * Route `GET /api/u/:username` qui retourne les informations d'un utilisateur
- *
  * @author Roger Montero
  */
 router.get('/:username', async (req, res, next) => {
@@ -62,7 +59,6 @@ router.get('/:username', async (req, res, next) => {
 
 /**
  * Route `GET /api/u/:username/posts` qui retourne les posts d'un utilisateur
- *
  * @author Roger Montero
  */
 router.get('/:username/posts', async (req, res, next) => {
@@ -80,7 +76,6 @@ router.get('/:username/posts', async (req, res, next) => {
 
 /**
  * Route `GET /api/u/:username/likes` qui retourne les likes d'un utilisateur
- *
  * @author Roger Montero
  */
 router.get('/:username/likes', async (req, res, next) => {
@@ -98,7 +93,6 @@ router.get('/:username/likes', async (req, res, next) => {
 
 /**
  * Route `GET /api/u/:username/followers` qui retourne les followers d'un utilisateur
- *
  * @author Roger Montero
  */
 router.get('/:username/followers', async (req, res, next) => {
@@ -117,7 +111,6 @@ router.get('/:username/followers', async (req, res, next) => {
 /**
  * Route `GET /api/u/:username/following` qui retourne les utilisateurs
  * following cet utilisateur
- *
  * @author Roger Montero
  */
 router.get('/:username/following', async (req, res, next) => {

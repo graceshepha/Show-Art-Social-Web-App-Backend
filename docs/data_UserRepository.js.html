@@ -1,4 +1,32 @@
-// @ts-check
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: data/UserRepository.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: data/UserRepository.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// @ts-check
 const debug = require('debug')('backend:UserRepository');
 const mongoose = require('mongoose');
 const client = require('../utils/database');
@@ -7,9 +35,9 @@ const {
 } = require('../utils/errors');
 /**
  * @typedef {import('../types/schemas.types').User} User
- * @typedef {mongoose.HydratedDocument<User>} UserDocument
- * @typedef {mongoose.PaginateDocument<User, {}>} UserPaginatedDocument
- * @typedef {mongoose.PaginateResult<UserPaginatedDocument>} UserPaginatedResult
+ * @typedef {mongoose.HydratedDocument&lt;User>} UserDocument
+ * @typedef {mongoose.PaginateDocument&lt;User, {}>} UserPaginatedDocument
+ * @typedef {mongoose.PaginateResult&lt;UserPaginatedDocument>} UserPaginatedResult
  */
 
 /**
@@ -48,7 +76,7 @@ class UserRepository {
    *
    * @param {string} search Filtre (by username)
    * @param {mongoose.PaginateOptions} options Options de la pagination
-   * @returns {Promise<UserPaginatedResult>} Liste de tous les utilisateurs
+   * @returns {Promise&lt;UserPaginatedResult>} Liste de tous les utilisateurs
    * @author Roger Montero
    */
   async getAll(search, { select, page = 1 }) {
@@ -144,7 +172,7 @@ class UserRepository {
    * Cette méthode est utilisé pour la requête suite à la connexion d'un utilisateur.
    *
    * @param {User} info Details d'un utilisateur
-   * @returns {Promise<UserDocument>} Utilisateur créé ou modifié
+   * @returns {Promise&lt;UserDocument>} Utilisateur créé ou modifié
    * @author Roger Montero
    */
   async initialUpsertOne(info) {
@@ -191,7 +219,7 @@ class UserRepository {
    * Trouve un utilisateur avec son courriel.
    *
    * @param {string} email Courriel de l'utilisateur
-   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé
+   * @returns {Promise&lt;UserDocument | null>} Document de l'utilisateur trouvé
    * @author Roger Montero
    */
   async findByEmail(email) {
@@ -210,7 +238,7 @@ class UserRepository {
    * Trouve toutes les informations d'un utilisateur avec son courriel.
    *
    * @param {string} email Courriel de l'utilisateur
-   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé
+   * @returns {Promise&lt;UserDocument | null>} Document de l'utilisateur trouvé
    * @author Roger Montero
    */
   async findAllUserInfoByEmail(email) {
@@ -233,7 +261,7 @@ class UserRepository {
    * Trouve un utilisateur avec son username.
    *
    * @param {string} username Username de l'utilisateur
-   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé
+   * @returns {Promise&lt;UserDocument | null>} Document de l'utilisateur trouvé
    * @author Roger Montero
    */
   async findByUsername(username) {
@@ -251,7 +279,7 @@ class UserRepository {
    * Trouve un utilisateur avec son id.
    *
    * @param {string | mongoose.Types.ObjectId} userId Id de l'utilisateur
-   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé
+   * @returns {Promise&lt;UserDocument | null>} Document de l'utilisateur trouvé
    * @author My-Anh Chau
    */
   async findUserById(userId) {
@@ -270,7 +298,7 @@ class UserRepository {
    *
    * @param {string} username Username de l'utilisateur
    * @param {string} select Fields à retourner
-   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé
+   * @returns {Promise&lt;UserDocument | null>} Document de l'utilisateur trouvé
    * @author Roger Montero
    */
   async findByUsernameSelect(username, select) {
@@ -289,7 +317,7 @@ class UserRepository {
    * Trouver les posts d'un utilisateur avec son username.
    *
    * @param {string} username Username de l'utilisateur
-   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé
+   * @returns {Promise&lt;UserDocument | null>} Document de l'utilisateur trouvé
    * @author Roger Montero
    */
   async findUserPostsByUsername(username) {
@@ -308,7 +336,7 @@ class UserRepository {
    * Trouve les likes d'un utilisateur avec son username.
    *
    * @param {string} username Username de l'utilisateur
-   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé
+   * @returns {Promise&lt;UserDocument | null>} Document de l'utilisateur trouvé
    * @author Roger Montero
    */
   async findUserLikesByUsername(username) {
@@ -328,7 +356,7 @@ class UserRepository {
    * Trouve les followers d'un utilisateur avec son username.
    *
    * @param {string} username Username de l'utilisateur
-   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé
+   * @returns {Promise&lt;UserDocument | null>} Document de l'utilisateur trouvé
    * @author Roger Montero
    */
   async findUserFollowersByUsername(username) {
@@ -347,7 +375,7 @@ class UserRepository {
    * Trouve les following d'un utilisateur avec son username.
    *
    * @param {string} username Username de l'utilisateur
-   * @returns {Promise<UserDocument | null>} Document de l'utilisateur trouvé
+   * @returns {Promise&lt;UserDocument | null>} Document de l'utilisateur trouvé
    * @author Roger Montero
    */
   async findUserFollowingByUsername(username) {
@@ -364,3 +392,26 @@ class UserRepository {
 }
 
 module.exports = new UserRepository();
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CustomError.html">CustomError</a></li><li><a href="DatabaseClient.html">DatabaseClient</a></li><li><a href="PostRepository.html">PostRepository</a></li><li><a href="UserRepository.html">UserRepository</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DuplicatedUnique">DuplicatedUnique</a></li><li><a href="global.html#EntityNotFound">EntityNotFound</a></li><li><a href="global.html#InvalidKey">InvalidKey</a></li><li><a href="global.html#NotConnected">NotConnected</a></li><li><a href="global.html#postSchema">postSchema</a></li><li><a href="global.html#storage">storage</a></li><li><a href="global.html#tagSchema">tagSchema</a></li><li><a href="global.html#UnknownError">UnknownError</a></li><li><a href="global.html#upload">upload</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Mar 02 2022 19:49:19 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
