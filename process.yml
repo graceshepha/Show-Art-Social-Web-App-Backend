@@ -1,5 +1,5 @@
 apps:
-    - name: expressapi
+    - name: backend
       script: ./bin/www
       exec_mode: cluster
       instances: max

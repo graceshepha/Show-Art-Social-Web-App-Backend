@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/database/Database.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/database/Database.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// @ts-check
+const debug = require('debug')('backend:database');
+const mongoose = require('mongoose');
+const { NotConnected } = require('../errors');
+const schemas = require('./data.schemas');
+/**
+ * @typedef {import('../../types/schemas.types').User} User
+ * @typedef {import('../../types/schemas.types').Post} Post
+ * @typedef {import('../../types/schemas.types').Tag} Tag
+ */
+
+/**
+ * Objet client de la base de donnée qui facilite la création des
+ * modèles pour chaque collection de la base de données.
+ *
+ * @author Roger Montero
+ */
+class DatabaseClient {
+  /**
+   * L'instance du client
+   *
+   * @memberof DatabaseClient
+   * @type {mongoose.Connection | undefined}
+   */
+  #client;
+
+  /**
+   * L'état de la base de donnéee
+   *
+   * @memberof DatabaseClient
+   * @type {boolean}
+   */
+  #connected;
+
+  /** @constructor DatabaseClient */
+  constructor() {
+    const {
+      DB_ADMIN_USER: user,
+      DB_ADMIN_PASSWORD: pass,
+      DB_SERVER: server = 'localhost',
+      DB_AUTH_SOURCE: authSource,
+      DB_PORT: port = '27017',
+      DB_DATABASE: dbName = 'test',
+    } = process.env;
+    if (!user || !pass) throw new Error('Environment variables DB_ADMIN_USER and DB_ADMIN_PASSWORD must be set');
+    const params = new URLSearchParams({ retryWrites: 'true', w: 'majority' });
+    if (authSource) params.set('authSource', authSource);
+
+    const uri = `mongodb://${user}:${pass}@${server}:${port}/${dbName}?${params.toString()}`;
+    if (this.#connected) {
+      debug('Database already connected');
+      return;
+    }
+    this.#client = mongoose.createConnection(uri, { dbName, maxPoolSize: 2 });
+
+    // handle error
+    this.#client.once('connected', () => {
+      debug('Connection successful');
+      this.#connected = true;
+      this.#initModels();
+    });
+
+    this.#client.on('error', (err) => {
+      debug(`Error database connection: ${err}`);
+      this.#connected = false;
+    });
+  }
+
+  /**
+   * Le état du client de la base de donnée
+   *
+   * @return {boolean} True si la base de donnée est connectée
+   * @memberof DatabaseClient
+   */
+  isConnected() {
+    return this.#connected;
+  }
+
+  /**
+   * Initialise les modèles
+   *
+   * @memberof DatabaseClient
+   */
+  #initModels() {
+    // Init just in case
+    this.getUserModel();
+    this.getPostModel();
+    this.getTagModel();
+  }
+
+  /**
+   * Crée le modèle des utilisateurs et le retourne
+   *
+   * @returns {schemas.UserModel} User model
+   * @throws {DatabaseError}
+   * @memberof DatabaseClient
+   */
+  getUserModel() {
+    if (!this.isConnected) throw NotConnected();
+    return this.#client.model('User', schemas.userSchema);
+  }
+
+  /**
+   * Crée le modèle des posts et le retourne
+   *
+   * @returns {schemas.PostModel} Post model
+   * @throws {DatabaseError}
+   * @memberof DatabaseClient
+   */
+  getPostModel() {
+    if (!this.isConnected) throw NotConnected();
+    return this.#client.model('Post', schemas.postSchema);
+  }
+
+  /**
+   * Crée le modèle des tags et le retourne
+   *
+   * @returns {schemas.TagModel} Tag model
+   * @throws {DatabaseError}
+   * @memberof DatabaseClient
+   */
+  getTagModel() {
+    if (!this.isConnected) throw NotConnected();
+    // @ts-ignore
+    return this.#client.model('Tag', schemas.tagSchema);
+  }
+
+  /**
+   * Closes the database
+   *
+   * @memberof DatabaseClient
+   */
+  close() {
+    this.#client.close();
+    this.#connected = false;
+  }
+}
+
+module.exports = DatabaseClient;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CustomError.html">CustomError</a></li><li><a href="DatabaseClient.html">DatabaseClient</a></li><li><a href="PostRepository.html">PostRepository</a></li><li><a href="UserRepository.html">UserRepository</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DuplicatedUnique">DuplicatedUnique</a></li><li><a href="global.html#EntityNotFound">EntityNotFound</a></li><li><a href="global.html#InvalidKey">InvalidKey</a></li><li><a href="global.html#NotConnected">NotConnected</a></li><li><a href="global.html#postSchema">postSchema</a></li><li><a href="global.html#tagSchema">tagSchema</a></li><li><a href="global.html#UnknownError">UnknownError</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed Mar 02 2022 13:37:59 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
