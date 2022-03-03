@@ -3,9 +3,12 @@
 /**
  * Module dependencies.
  */
+require('dotenv/config');
 const debug = require('debug')('backend:server');
 const http = require('http');
 const app = require('../app');
+
+const { client } = require('../utils/database');
 
 /**
  * Normalize a port into a number, string, or false.
@@ -28,18 +31,13 @@ function normalizePort(val) {
 /**
  * Get port from environment and store in Express.
  */
-const port = normalizePort(process.env.PORT);
+const port = normalizePort(process.env.SERVER_PORT);
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 const server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-server.listen(port);
 server.on('listening', () => {
   /**
    * Event listener for HTTP server "listening" event.
@@ -71,4 +69,16 @@ server.on('error', (error) => {
     default:
       throw error;
   }
+});
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+server.listen(port);
+
+/**
+ * Exit handler
+ */
+process.on('exit', () => {
+  client.close();
 });

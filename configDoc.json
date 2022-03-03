@@ -1,0 +1,7 @@
+{
+    "source": {
+        "include": ["./data", "./utils", "./types"],
+        "includePattern": ".+\\.(js|ts)$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    }
+}

@@ -1,1 +1,9 @@
+.dockerignore
+.gitignore
+.git
+.vscode/
+.env
+.env.template
+public/images/**
+!public/images/.gitkeep
 node_modules/

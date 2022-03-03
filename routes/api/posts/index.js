@@ -1,80 +1,170 @@
+const router = require('express').Router();
+const { PaginationParameters } = require('mongoose-paginate-v2');
+const { randomBytes } = require('crypto');
+const path = require('path');
+const multer = require('multer');
+const postRepository = require('../../../data/PostRepository');
+const userRepository = require('../../../data/UserRepository');
+const checkJwt = require('../../../utils/middleware/checkJwt');
+const { EntityNotFound } = require('../../../utils/errors');
+
 /**
- * 
- * @author My-Anh Chau            
- * 
+ * Route `GET /api/p/` qui retourne tous les posts avec pagination
+ * @author Bly, Grâce Schephatia
  */
-const post = require('./post');
+router.get('/', async (req, res, next) => {
+  const search = typeof req.query.search === 'string' ? req.query.search : '';
+  try {
+    const posts = await postRepository.getAll(
+      search,
+      new PaginationParameters(req).getOptions(),
+    );
+    res.status(200).json(posts);
+  } catch (err) {
+    next(err);
+  }
+});
 
-router.use(authMiddleware, post);
+/**
+ * Le storage pour `multer`.
+ * @type {multer.StorageEngine}
+ */
+const storage = multer.diskStorage({
+  destination(_req, _file, cb) {
+    cb(null, 'public/images');
+  },
+  filename(_req, file, cb) {
+    const uniqueSuffix = `${Date.now()}-${randomBytes(10).toString('hex')}`;
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+/**
+ * Middleware pour obtenir et sauvegarder les images reçus à des routes.
+ */
+const upload = multer({ storage });
 
-const router = express.Router();
+/**
+ * Route `POST /api/p/` qui ajoute un post
+ * @author Bly Grâce Schephatia
+ */
+router.post('/', checkJwt, upload.single('image'), async (req, res, next) => {
+  try {
+    const { body } = req;
+    const email = req.auth.payload['http://localhost//email'];
+    const user = await userRepository.findByEmail(email);
+    if (!user) throw EntityNotFound();
+    // eslint-disable-next-line dot-notation
+    body.owner = user._id;
+    body.image = `/assets/images/${req.file.filename}`;
+    await postRepository.insertOne(body);
+    res.status(201).end();
+  } catch (err) {
+    next(err);
+  }
+});
 
-// routes
-const {
-    getToutPosts, addPost, removePost,
-  } = require('BD/POST');
+/**
+ * Route `GET /api/p/:id` qui permet d'obtenir un seul post avec son id
+ * @author My-Anh Chau
+ */
+router.get('/:id', async (req, res, next) => {
+  try {
+  // on get le id
+    const { id } = req.params;
+    const post = await postRepository.findPostById(id);
+    if (!post) throw EntityNotFound();
+    res.status(200).json(post.toJSON({ virtuals: true }));
+  } catch (err) {
+    next(err);
+  }
+});
 
-// ROUTE POUR GET LES POSTS
-router.get('/u', async (req, res) => {
-    try {
-      const items = await getToutPosts(req.userId);
-  
-      res
-        .status(200)
-        .json(items);
-    } catch {
-      res
-        .status(500)
-        .json({ status: 500, message: 'Internal Server Error' });
-    }
-  });
+/**
+ * Route `POST /api/p/:id/view` qui ajoute un view à un post.
+ * @author Roger Montero
+ */
+router.post('/:id/view', async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    await postRepository.addView(id);
+    res.status(204)
+      .end();
+  } catch (err) {
+    next(err);
+  }
+});
 
-  // ROUTE POUR AJOUTER UN POST
-router.post('/u', async (req, res) => {
-    const { idPost, idTag } = req.query;
-    try {
-      if (!idPost || !idTag) {
-        res
-          .status(400)
-          .json({ status: 400, message: 'Bad Request' });
-      } else {
-        await addPost({ idUtilisateur: req.userId, idChaussure, idPointure });
-        res
-          .status(200)
-          .end();
-      }
-    } catch (err) {
-      console.error(err);
-      res
-        .status(500)
-        .json({ status: 500, message: 'Internal Server Error' });
-    }
-  });
+/**
+ * Route `POST /api/p/:id/comment` pour ajouter un commentaire qui retourne une réponse 200
+ * avec tous les comments du post.
+ * @author Roger Montero
+ */
+router.post('/:id/comment', checkJwt, async (req, res, next) => {
+  const { id } = req.params;
+  const { comment } = req.body;
+  try {
+    const user = await userRepository.findByEmail(req.auth.payload['http://localhost//email']);
+    if (!user) throw EntityNotFound(); // shouldn't be the case
+    const post = await postRepository.addComment(id, {
+      user: user._id,
+      comment,
+    });
+    res.status(200)
+      .json(post.comments.toObject({ virtuals: true }));
+  } catch (err) {
+    next(err);
+  }
+});
 
-  // ROUTE POUR ENLEVER UN POST
-router.delete('/p', async (req, res) => {
-    const { idPost, idTag } = req.query;
-    try {
-      if (!idPost || !idTag) {
-        res
-          .status(400)
-          .json({ status: 400, message: 'Bad Request' });
-      } else {
-          await removePost({
-            idUtilisateur: req.userId, idChaussure, idPointure, quantite,
-          });
-        res
-          .status(200)
-          .end();
-      }
-    } catch {
-      res
-        .status(500)
-        .json({ status: 500, message: 'Internal Server Error' });
-    }
-  });
+/**
+ * Route `GET /p/:id/like` qui permet de voir si post à été aimé par l'utilisateur
+ * @author Roger Montero
+ */
+router.get('/:id/like', checkJwt, async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const email = req.auth.payload['http://localhost//email'];
+    const user = await userRepository.findByEmail(email);
+    if (!user) throw EntityNotFound();
+    const hasLiked = await postRepository.hasLiked(user.id, id);
+    res.status(200).json({ hasLiked });
+  } catch (err) {
+    next(err);
+  }
+});
 
+/**
+ * Route `POST /p/:id/like` qui permet d'ajouter un like à post
+ * @author My-Anh Chau
+ */
+router.post('/:idPost/like', checkJwt, async (req, res, next) => {
+  try {
+    const email = req.auth.payload['http://localhost//email'];
+    const user = await userRepository.findByEmail(email);
+    if (!user) throw EntityNotFound();
+    const { idPost } = req.params;
+    await postRepository.addLike(user.id, idPost);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+});
 
-
+/**
+ * Route `DELETE /p/:id/like` qui permet d'enlever un like à post
+ * @author My-Anh Chau
+ */
+router.delete('/:idPost/like', checkJwt, async (req, res, next) => {
+  try {
+    const email = req.auth.payload['http://localhost//email'];
+    const user = await userRepository.findByEmail(email);
+    if (!user) throw EntityNotFound();
+    const { idPost } = req.params;
+    await postRepository.removeLike(user.id, idPost);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;
