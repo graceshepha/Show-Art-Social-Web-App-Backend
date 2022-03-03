@@ -9,10 +9,12 @@ const router = express.Router();
 
 // routes
 router.use('/u', users);
-// on va pas l'utiliser encore
 router.use('/p', posts);
 
 /**
+ *
+ * Cette route retourne les informations de l'utilisateur actuellement connecté
+ * @param 
  * @author Bly Grâce Schephatia
  */
 router.get('/me', checkJwt, async (req, res, next) => {
